@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MASET SoloLearn Journey</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+body{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  background:linear-gradient(135deg,#090514 0%,#170d3d 50%,#0a061a 100%);
+  color:#f1f5f9; min-height:100vh;
+}
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:#0f0b24}
+::-webkit-scrollbar-thumb{background:#7c3aed;border-radius:4px}
+.fun-card{
+  background:rgba(22,17,48,.92);backdrop-filter:blur(16px);
+  border-radius:1.5rem;box-shadow:0 20px 40px -10px rgba(124,58,237,.25),0 4px 12px rgba(0,0,0,.4);
+  border:1px solid rgba(139,92,246,.35);
+}
+.exam-term{
+  color:#f472b6;font-weight:900;background:rgba(244,114,182,.10);
+  padding:0 4px;border-radius:4px;border-bottom:1px dashed #f472b6
+}
+.pro-tip{
+  background:linear-gradient(135deg,rgba(245,158,11,.13),rgba(124,58,237,.08));
+  border-left:5px solid #f59e0b;border-radius:1rem;padding:1rem 1.15rem;
+}
+.lesson-node{position:relative}
+.lesson-node:not(:last-child)::after{
+  content:'';position:absolute;left:25px;top:58px;bottom:-32px;width:2px;
+  background:linear-gradient(#7c3aed,rgba(124,58,237,.05));
+}
+.node-dot{
+  width:50px;height:50px;border-radius:16px;background:#181338;border:1px solid #5b21b6;
+  display:flex;align-items:center;justify-content:center;flex:none;z-index:2
+}
+.node-dot.done{background:linear-gradient(135deg,#10b981,#14b8a6);border-color:#34d399}
+.node-dot.active{background:linear-gradient(135deg,#7c3aed,#db2777);border-color:#f0abfc;box-shadow:0 0 0 6px rgba(124,58,237,.14)}
+.lesson-body{transition:all .3s ease}
+.quiz-option{transition:all .2s ease}
+.quiz-option:hover:not(:disabled){transform:translateX(4px);border-color:#8b5cf6;background:rgba(124,58,237,.18)}
+.quiz-correct{border-color:#10b981!important;background:rgba(6,78,59,.65)!important;color:#d1fae5!important}
+.quiz-wrong{border-color:#f43f5e!important;background:rgba(127,29,29,.65)!important;color:#ffe4e6!important}
+.fade-in{animation:fadeIn .35s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.pulse-soft{animation:pulseSoft 2s infinite}
+@keyframes pulseSoft{0%,100%{box-shadow:0 0 0 0 rgba(167,139,250,.22)}50%{box-shadow:0 0 0 10px rgba(167,139,250,0)}}
+.solo-shell{max-width:1000px;margin:0 auto}
+.solo-map{display:flex;gap:.55rem;flex-wrap:wrap;padding:.15rem .1rem .5rem}
+.solo-map button{min-width:42px;height:42px;border-radius:12px;border:1px solid rgba(139,92,246,.35);background:#181338;color:#c4b5fd;font-weight:900;font-size:.75rem;transition:.2s}
+.solo-map button:hover{transform:translateY(-1px);border-color:#a78bfa}
+.solo-map button.done{background:linear-gradient(135deg,#064e3b,#0f766e);border-color:#34d399;color:#ecfdf5}
+.solo-map button.current{background:linear-gradient(135deg,#7c3aed,#db2777);border-color:#f0abfc;color:#fff;box-shadow:0 0 0 5px rgba(124,58,237,.12)}
+.solo-map button.reviewed{box-shadow:inset 0 -3px 0 #10b981}
+.solo-lesson{min-height:520px}
+.solo-note{font-size:1rem;line-height:1.85;color:#dbe4f0}
+.solo-note + .solo-note{margin-top:1.1rem}
+.solo-note strong,.solo-note b{color:#f8fafc}
+.solo-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(139,92,246,.45),transparent);margin:1.7rem 0}
+.solo-checkpoint{border:1px solid rgba(16,185,129,.35);background:linear-gradient(135deg,rgba(6,78,59,.18),rgba(22,17,48,.7));border-radius:1.5rem;padding:1.35rem}
+.solo-memory{border:1px solid rgba(245,158,11,.35);background:linear-gradient(135deg,rgba(120,53,15,.16),rgba(22,17,48,.7));border-radius:1.5rem;padding:1.35rem}
+.solo-actions{display:flex;justify-content:space-between;gap:.75rem;align-items:center;flex-wrap:wrap}
+.solo-btn-secondary{background:#181338;border:1px solid rgba(139,92,246,.45);color:#ddd6fe;padding:.8rem 1rem;border-radius:1rem;font-weight:900}
+.solo-btn-secondary:hover{background:#241a4a}
+.solo-progress-mini{height:6px;background:#180f38;border-radius:999px;overflow:hidden}
+.solo-progress-mini>div{height:100%;background:linear-gradient(90deg,#7c3aed,#db2777,#10b981);border-radius:999px;transition:width .35s ease}
+@media(max-width:640px){.solo-note{font-size:.95rem;line-height:1.75}.solo-lesson{min-height:480px}}
+
+
+/* Enhanced micro-lesson presentation */
+.note-stack{display:grid;gap:1rem;}
+.note-card{background:rgba(24,19,56,.78);border:1px solid rgba(139,92,246,.28);border-radius:1.25rem;padding:1.25rem;box-shadow:inset 0 1px 0 rgba(255,255,255,.03);}
+.note-card .note-label{font-size:.65rem;letter-spacing:.16em;text-transform:uppercase;font-weight:900;color:#a78bfa;margin-bottom:.55rem}
+.note-card .note-explain{color:#cbd5e1;font-size:.92rem;line-height:1.8;margin-top:.8rem}
+.note-card .note-example{margin-top:.9rem;padding:.85rem 1rem;border-radius:.9rem;background:rgba(8,6,26,.55);border:1px solid rgba(99,102,241,.25);font-size:.82rem;line-height:1.7;color:#c4b5fd}
+.key-inline{color:#f9a8d4;font-weight:900;background:rgba(236,72,153,.10);padding:.05rem .22rem;border-radius:.3rem;border-bottom:1px dashed rgba(244,114,182,.7)}
+.lesson-endcap{margin-top:1rem}
+
+/* ===== Added Study Tools (Flashcards / Glossary / Mock Exam) ===== */
+.study-tools-bar{background:rgba(15,11,36,.92);backdrop-filter:blur(14px);border-top:1px solid rgba(139,92,246,.25);border-bottom:1px solid rgba(139,92,246,.25)}
+.study-tool-btn{background:#181338;border:1px solid rgba(139,92,246,.35);color:#ddd6fe;border-radius:14px;padding:.7rem 1rem;font-weight:900;font-size:.78rem;transition:.2s}
+.study-tool-btn:hover{transform:translateY(-1px);border-color:#a78bfa;background:#241a4a}
+.study-tool-btn.active{background:linear-gradient(135deg,#7c3aed,#db2777);color:#fff;border-color:rgba(255,255,255,.25);box-shadow:0 8px 20px rgba(124,58,237,.25)}
+.study-overlay{position:fixed;inset:0;z-index:100;background:rgba(7,4,18,.9);backdrop-filter:blur(8px);display:none;overflow-y:auto;padding:1rem}
+.study-overlay.show{display:block}
+.study-panel{max-width:1100px;margin:1rem auto;background:rgba(22,17,48,.98);border:1px solid rgba(139,92,246,.4);border-radius:1.5rem;box-shadow:0 25px 60px rgba(0,0,0,.45);overflow:hidden}
+.study-panel-head{padding:1.2rem 1.35rem;border-bottom:1px solid rgba(139,92,246,.25);display:flex;gap:1rem;align-items:center;justify-content:space-between;background:#120e2b;position:sticky;top:0;z-index:2}
+.study-close{width:42px;height:42px;border-radius:12px;background:#181338;border:1px solid rgba(139,92,246,.4);color:#ddd6fe;font-weight:900}
+.study-subnav{display:flex;gap:.5rem;flex-wrap:wrap;padding:1rem 1.2rem;border-bottom:1px solid rgba(139,92,246,.2);background:#0f0b24}
+.study-subnav button{padding:.55rem .8rem;border-radius:10px;border:1px solid rgba(139,92,246,.3);background:#181338;color:#c4b5fd;font-size:.72rem;font-weight:900}
+.study-subnav button.active{background:linear-gradient(135deg,#7c3aed,#db2777);color:white}
+.fc-topic{padding:.5rem .75rem;border-radius:10px;border:1px solid rgba(139,92,246,.3);background:#181338;color:#c4b5fd;font-size:.72rem;font-weight:900}
+.fc-topic.active{background:linear-gradient(135deg,#7c3aed,#db2777);color:white;border-color:#f0abfc}
+.fc-card{min-height:330px;display:flex;align-items:center;justify-content:center;text-align:center;padding:2rem;background:linear-gradient(135deg,#181338,#100c25);border:1px solid rgba(139,92,246,.4);border-radius:1.5rem}
+.gloss-item{background:#181338;border:1px solid rgba(139,92,246,.3);border-radius:1rem;padding:1rem}
+.gloss-term{font-weight:900;color:#f8fafc}.gloss-priority{display:inline-flex;font-size:.62rem;padding:.18rem .45rem;border-radius:999px;background:rgba(244,114,182,.12);color:#f9a8d4;border:1px solid rgba(244,114,182,.25);margin-left:.35rem}
+.mock-opt{width:100%;text-align:left;padding:1rem;border-radius:1rem;border:2px solid rgba(139,92,246,.28);background:#120e2b;color:#e2e8f0;font-weight:800;transition:.2s}
+.mock-opt:hover:not(:disabled){border-color:#8b5cf6;background:#241a4a;transform:translateX(3px)}
+.mock-opt.correct{border-color:#10b981;background:rgba(6,78,59,.55);color:#d1fae5}.mock-opt.wrong{border-color:#f43f5e;background:rgba(127,29,29,.55);color:#ffe4e6}
+.mock-meta{font-size:.72rem;color:#a78bfa;font-weight:900}.mock-progress{height:8px;border-radius:999px;background:#180f38;overflow:hidden}.mock-progress>div{height:100%;background:linear-gradient(90deg,#7c3aed,#db2777);border-radius:999px}
+.mock-result{background:#181338;border:1px solid rgba(139,92,246,.35);border-radius:1.25rem;padding:1.5rem;text-align:center}
+@media(max-width:640px){.study-panel{margin:.25rem auto}.fc-card{min-height:280px;padding:1.4rem}}
+
+</style>
+</head>
+<body class="min-h-screen">
+
+<header class="sticky top-0 z-40 bg-[#0f0b24]/95 backdrop-blur-xl border-b border-purple-900/50 shadow-lg">
+  <div class="max-w-6xl mx-auto px-4 py-4">
+    <div class="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-600/40">
+          <i class="fa-solid fa-graduation-cap text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-lg md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">
+            MASET Learning Journey
+          </h1>
+          <p class="text-[10px] md:text-xs text-purple-300 font-bold tracking-widest uppercase">
+            Learn → Think → Check → Continue
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 bg-[#181338] p-1.5 rounded-2xl border border-purple-800/60">
+        <button id="track-foundation" onclick="setTrack('foundation')"
+          class="track-btn bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2.5 rounded-xl text-xs font-black">
+          <i class="fa-solid fa-database mr-1"></i> Foundation
+        </button>
+        <button id="track-analyst" onclick="setTrack('analyst')"
+          class="track-btn text-purple-300 hover:text-white px-4 py-2.5 rounded-xl text-xs font-black">
+          <i class="fa-solid fa-chart-pie mr-1"></i> Analyst
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="study-tools-bar sticky top-[73px] md:top-[81px] z-30">
+  <div class="max-w-6xl mx-auto px-4 py-2.5 flex flex-wrap gap-2 items-center">
+    <span class="text-[10px] uppercase tracking-widest font-black text-purple-400 mr-1">Study Tools</span>
+    <button class="study-tool-btn" onclick="suiteOpen('flashcards')"><i class="fa-solid fa-layer-group text-purple-400 mr-2"></i>Flashcards</button>
+    <button class="study-tool-btn" onclick="suiteOpen('glossary')"><i class="fa-solid fa-spell-check text-pink-400 mr-2"></i>Glossary</button>
+    <button class="study-tool-btn" onclick="suiteOpen('exam')"><i class="fa-solid fa-trophy text-amber-400 mr-2"></i>Mock Exam</button>
+    <span class="ml-auto text-[10px] text-purple-300 font-bold hidden sm:inline">Built from your MASET material + current PeopleCert public exam scope</span>
+  </div>
+</div>
+
+
+<main class="max-w-6xl mx-auto px-4 py-6 md:py-10">
+  <section id="welcome" class="fun-card p-7 md:p-10 mb-8 relative overflow-hidden">
+    <div class="absolute -right-8 -bottom-10 text-[12rem] text-white/5 pointer-events-none"><i class="fa-solid fa-route"></i></div>
+    <div class="relative z-10 max-w-4xl">
+      <span class="inline-flex items-center gap-2 bg-purple-950/70 border border-purple-800 px-4 py-2 rounded-full text-[10px] uppercase tracking-widest font-black text-purple-200">
+        <i class="fa-solid fa-circle-play text-emerald-400"></i> Continuous Study Mode
+      </span>
+      <h2 id="welcome-title" class="text-3xl md:text-5xl font-black mt-5">MASET Foundation Journey</h2>
+      <p id="welcome-text" class="text-purple-200 mt-3 max-w-3xl leading-relaxed">
+        You will move through the course in one continuous path. Each lesson teaches one manageable concept,
+        lets you deep-dive when needed, then gives you a short pop quiz before you continue.
+      </p>
+
+      <div class="mt-6 flex flex-wrap gap-3">
+        <button onclick="startJourney()"
+          class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-7 py-4 rounded-2xl font-black shadow-lg hover:-translate-y-1 transition-all">
+          Start Journey <i class="fa-solid fa-arrow-right ml-2"></i>
+        </button>
+        <button onclick="restartJourney()"
+          class="bg-purple-950/70 border border-purple-700/60 text-purple-200 px-6 py-4 rounded-2xl font-black hover:bg-purple-900 transition-all">
+          Restart
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section id="progress-area" class="hidden mb-8">
+    <div class="fun-card p-5 md:p-6">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <div class="text-[10px] uppercase tracking-widest font-black text-purple-400">Journey progress</div>
+          <div class="mt-1 text-xl font-black text-white"><span id="progress-text">0 / 0 lessons</span></div>
+        </div>
+        <div class="text-sm font-black text-emerald-300"><span id="progress-percent">0%</span> complete</div>
+      </div>
+      <div class="w-full h-3 mt-4 rounded-full bg-purple-950 overflow-hidden border border-purple-900">
+        <div id="progress-bar" class="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-emerald-400 rounded-full transition-all duration-500" style="width:0%"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="journey" class="hidden">
+  <div class="solo-shell">
+    <div class="mb-5">
+      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+        <div>
+          <div class="text-xs font-black uppercase tracking-widest text-pink-400">Continuous lesson</div>
+          <h3 id="journey-title" class="text-2xl md:text-3xl font-black text-white mt-1"></h3>
+          <p class="text-sm text-purple-300 mt-2">Follow one connected storyline. Learn a few related ideas together, reinforce them with a checkpoint, then continue. Every chapter stays open for review.</p>
+        </div>
+        <div id="lesson-position" class="text-xs font-black text-purple-300 whitespace-nowrap"></div>
+      </div>
+    </div>
+
+    <div class="fun-card p-4 md:p-5 mb-5">
+      <div class="flex items-center justify-between gap-3 mb-3">
+        <div class="text-[10px] uppercase tracking-widest font-black text-purple-400">Journey chapters</div>
+        <div id="current-lesson-status" class="text-[10px] font-black uppercase tracking-widest text-emerald-300"></div>
+      </div>
+      <div id="lesson-map" class="solo-map"></div>
+    </div>
+
+    <div class="fun-card p-5 md:p-8 solo-lesson fade-in" id="solo-lesson-panel">
+      <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+        <div>
+          <div id="lesson-section" class="text-[10px] uppercase tracking-widest font-black text-pink-400"></div>
+          <h4 id="lesson-title" class="text-2xl md:text-4xl font-black text-white mt-2"></h4>
+          <div class="mt-4 flex items-center gap-3">
+            <div class="w-28 solo-progress-mini"><div id="lesson-mini-bar" style="width:0%"></div></div>
+            <span id="lesson-mini-text" class="text-[10px] uppercase tracking-widest font-black text-purple-300"></span>
+          </div>
+        </div>
+        <div id="lesson-review-label" class="hidden text-xs font-black text-amber-300 bg-amber-950/40 border border-amber-700/40 px-3 py-2 rounded-xl">
+          <i class="fa-solid fa-rotate-left mr-1"></i> Review mode
+        </div>
+      </div>
+
+      <div id="solo-flow" class="mt-8"></div>
+
+      <div class="solo-divider"></div>
+
+      <div class="solo-actions">
+        <button id="prev-lesson-btn" onclick="goPreviousLesson()" class="solo-btn-secondary">
+          <i class="fa-solid fa-arrow-left mr-2"></i> Previous lesson
+        </button>
+        <button id="next-lesson-btn" onclick="goNextLesson()" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-5 py-3 rounded-xl font-black">
+          Next lesson <i class="fa-solid fa-arrow-right ml-2"></i>
+        </button>
+      </div>
+    </div>
+
+    <div id="completion" class="hidden fun-card p-8 md:p-12 mt-8 text-center border-emerald-500/30 bg-emerald-950/15">
+      <div class="w-24 h-24 rounded-[2rem] bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white text-4xl mx-auto mb-6 shadow-xl">
+        <i class="fa-solid fa-flag-checkered"></i>
+      </div>
+      <h3 class="text-3xl md:text-4xl font-black text-white">Journey Complete</h3>
+      <p id="completion-message" class="text-emerald-200 mt-3 font-medium"></p>
+      <button onclick="restartJourney()" class="mt-7 bg-gradient-to-r from-purple-600 to-pink-600 px-7 py-4 rounded-2xl font-black">
+        Start Again
+      </button>
+    </div>
+  </div>
+</section>
+</main>
+
+<script>
+const DATA = {"foundation": [{"title": "1. What is Data Science?", "section": "Foundation • Data Science Fundamentals", "teach": "Data science combines several disciplines to turn data into useful business insight. The course describes it as combining scientific method, math and statistics, specialized programming, advanced analytics, AI, and storytelling.", "deep": ["Core activities include \"<b>preparing data</b>\" for analysis and processing.", "Perform \"<b>advanced data analysis</b>\" using algorithms, analytics, Artificial Intelligence and Machine Learning to find patterns.", "Patterns can be transformed into \"<b>predictions</b>\" that support business decision making.", "Results should be \"<b>validated</b>\" through scientifically designed tests and experiments.", "Results should be \"<b>presented</b>\" using visualizations so stakeholders can draw informed conclusions.", "The course also connects Data Science with domain knowledge, mathematics/statistics and computer science."], "q": "Which combination best describes Data Science in this course?", "opts": ["Only database administration", "Scientific methods, math/statistics, programming, advanced analytics, AI and storytelling", "Only dashboard design", "Only machine learning"], "a": 1}, {"title": "2. The Data Science Lifecycle", "section": "Foundation • Data Science Fundamentals", "teach": "The lifecycle is a guide, not a rigid straight line. You can move forward or backward, work in several phases at once, or return to an earlier phase when new information appears.", "deep": ["The course gives six stages: <b>Discovery</b> — state the problem and collect data.", "<b>Data Preparation</b>.", "<b>Plan Model</b> — explore/transform data and design the analytical approach.", "<b>Build Model</b>.", "<b>Communicate Results / Publish Insights</b>.", "<b>Measure Effectiveness / Apply Live</b>.", "\"The lifecycle \"wheel\" isn't set in stone.\" Different organizations may use slightly different names."], "q": "Can a data project return to an earlier lifecycle phase?", "opts": ["No, the phases must always be completed once in order", "Yes, the lifecycle is iterative and can move backward", "Only after deployment", "Only if the database fails"], "a": 1}, {"title": "3. What is Big Data?", "section": "Foundation • Big Data", "teach": "Big Data is presented as the 21st-century phenomenon of exponential growth of business data and the challenges of collecting, storing, managing and analysing all the data an organisation owns or uses.", "deep": ["The data can come from employees, customers, partners, machines, logs, databases, security cameras, mobile devices, social media and more.", "The course emphasizes \"<b>Scalability</b>\", \"<b>Flexibility</b>\", \"<b>Limitless</b>\" storage/computation and \"<b>Coping with uncertainty</b>\".", "Big Data is not automatically better than traditional data; it addresses different operational scenarios.", "Its challenge is that the amount of data keeps increasing and the technology landscape evolves rapidly."], "q": "Which is one of the core reasons Big Data is challenging?", "opts": ["Data never changes", "The amount of data keeps increasing", "It can only contain structured data", "It cannot be processed in the cloud"], "a": 1}, {"title": "4. The 5 Vs of Big Data", "section": "Foundation • Big Data", "teach": "Learn the five dimensions as a set. Think: how much, how fast, what kinds, how trustworthy, and what business value.", "deep": ["\"<b>Volume</b>\" — physical size and scale of datasets.", "\"<b>Velocity</b>\" — speed at which data is generated, collected and processed.", "\"<b>Variety</b>\" — structured, semi-structured and unstructured formats.", "\"<b>Veracity</b>\" — quality, accuracy and reliability of incoming data.", "\"<b>Value</b>\" — actionable insight and business utility extracted from data."], "q": "Which V refers to data quality, accuracy and reliability?", "opts": ["Volume", "Velocity", "Variety", "Veracity"], "a": 3}, {"title": "5. Big Data Architecture, Cloud & Data Lakes", "section": "Foundation • Big Data", "teach": "Big Data solutions use distributed processing and increasingly cloud infrastructure. The course contrasts flexible Big Data approaches with traditional fixed-schema systems.", "deep": ["Computations can be partitioned across multiple networked computers using parallel jobs.", "\"<b>Schema-on-read</b>\" means raw data can be stored and structured when accessed; traditional databases commonly use \"<b>schema-on-write</b>\".", "Major cloud providers named in the material include AWS, Microsoft Azure, Google Cloud Platform, Alibaba Cloud and IBM Cloud.", "A managed \"<b>Data Lake</b>\" has high-quality data, streamlined ingestion, governance and metadata management.", "A \"<b>Data Swamp</b>\" is associated with broken ingestion, uneasy/restricted access, weak governance and high operational overhead."], "q": "What most closely describes a Data Swamp?", "opts": ["A well-governed data lake", "An unmanaged data environment with broken ingestion and restricted access", "A relational database", "A small spreadsheet"], "a": 1}, {"title": "6. Before Big Data: OLTP, OLAP and ETL", "section": "Foundation • Traditional Data Architecture", "teach": "Traditional systems emphasized consistent formats, centralized databases and fixed schemas. SQL was used with operational applications and analytical data warehouses.", "deep": ["\"<b>OLTP</b>\" — Online Transaction Processing; captures, stores and processes operational transactions in real time.", "\"<b>OLAP</b>\" — Online Analytical Processing; uses complex queries to analyse aggregated historical data.", "A data warehouse is an OLAP environment for analytical queries.", "Data from one or more OLTP systems can be moved into OLAP systems through \"<b>ETL</b>\" — Extract, Transform, Load.", "The course highlights the trade-off: structure and certainty historically came with limits in scalability."], "q": "Which system is primarily associated with real-time operational transactions?", "opts": ["OLAP", "OLTP", "ETL", "Data Lake"], "a": 1}, {"title": "7. Data Analytics & the Four Types", "section": "Foundation • Data Analytics", "teach": "Data analytics focuses on extracting insights from data. The material links it to programming, mathematics, statistics, data mining, cleansing, transformation and modelling.", "deep": ["\"<b>Descriptive analytics</b>\" — What happened and what is happening now?", "\"<b>Diagnostic analytics</b>\" — Why did it happen?", "\"<b>Predictive analytics</b>\" — What is likely to happen in the future?", "\"<b>Prescriptive analytics</b>\" — What do we need to do?", "Descriptive analytics is linked to BI; predictive and prescriptive analytics are treated as advanced analytics."], "q": "Which type of analytics answers 'Why did it happen?'", "opts": ["Descriptive", "Diagnostic", "Predictive", "Prescriptive"], "a": 1}, {"title": "8. CRISP-DM", "section": "Foundation • Data Analytics", "teach": "CRISP-DM provides a systematic, iterative cycle from the business problem to production.", "deep": ["\"<b>Business understanding</b>\" — set objectives and plan.", "\"<b>Data understanding</b>\" — assess data and useful sources.", "\"<b>Data preparation</b>\" — build, clean and enrich the dataset.", "\"<b>Modelling</b>\" — find useful patterns and choose models/features.", "\"<b>Evaluation</b>\" — evaluate model performance and improvements.", "\"<b>Deployment</b>\" — implement the solution into production."], "q": "Which CRISP-DM phase asks how good the model performs?", "opts": ["Business understanding", "Data preparation", "Evaluation", "Deployment"], "a": 2}, {"title": "9. Business Objectives & SMART", "section": "Foundation • Business & Professional Skills", "teach": "The course starts analytics projects by understanding the business problem and stakeholder needs. Objectives should be practical and validated before development.", "deep": ["SMART = \"<b>Specific</b>\", \"<b>Measurable</b>\", \"<b>Achievable</b>\", \"<b>Realistic</b>\", \"<b>Time-related</b>\".", "Validate feasibility and understand the impact of business objectives.", "Stakeholder alignment is necessary before execution.", "The course describes an innovation cycle followed by an integration cycle leading to production."], "q": "Which SMART element specifies when results can be achieved?", "opts": ["Specific", "Measurable", "Realistic", "Time-related"], "a": 3}, {"title": "10. Data Types & Measurement Scales", "section": "Foundation • Statistics", "teach": "The course distinguishes qualitative and quantitative data and four measurement scales.", "deep": ["\"<b>Nominal</b>\" — categorical labels with no quantitative values.", "\"<b>Ordinal</b>\" — categories with a natural order but no quantifiable distance.", "\"<b>Interval</b>\" — ordered numerical values with equal intervals but no \"<b>true zero</b>\".", "\"<b>Ratio</b>\" — ordered values with equal intervals and a \"<b>true zero</b>\".", "Qualitative data is descriptive and useful for understanding concepts, thoughts and experiences.", "Quantitative data is countable/measurable and supports statistical analysis."], "q": "Which scale has a true zero?", "opts": ["Nominal", "Ordinal", "Interval", "Ratio"], "a": 3}, {"title": "11. Data Management, Governance & Data Quality", "section": "Foundation • Governance", "teach": "Data Management is about managing data professionally. DAMA-DMBOK is presented as an 11-Knowledge-Area model with Data Governance at its heart.", "deep": ["\"<b>Data governance</b>\" defines who has authority and control over data assets and how they may be used.", "It encompasses people, processes and technologies.", "\"<b>Data stewardship</b>\" is a functional role that helps turn data policies and standards into practice within a domain.", "\"<b>Data quality</b>\" concerns accuracy, completeness, consistency, reliability and whether data is up to date.", "\"<b>Master data management</b>\" focuses on uniformity, accuracy, stewardship, semantic consistency and accountability of shared master data assets.", "The DAMA-DMBOK maturity levels shown are Initial, Repeatable, Defined, Managed and Optimizing."], "q": "What is the main role of Data Governance?", "opts": ["Writing Python code", "Defining authority, control and acceptable use of data assets", "Replacing every database", "Creating charts only"], "a": 1}, {"title": "12. Data Privacy & GDPR", "section": "Foundation • Privacy & Compliance", "teach": "The course treats privacy, ethics and compliance as major Big Data considerations and explains GDPR as a central privacy use case.", "deep": ["\"<b>Data privacy</b>\" protects personal data and gives individuals control over who can access it.", "\"<b>GDPR</b>\" applies to organisations processing data of EU data subjects and has international reach.", "The material states a maximum penalty of \"<b>€20 million or 4% of global annual sales</b>\", whichever is higher.", "\"<b>Article 4(1)</b>\" defines personal data as information relating to an identified or identifiable natural person.", "\"<b>Article 9(1)</b>\" covers sensitive categories including health, genetic and biometric data.", "The course says GDPR is about \"<b>giving control over personal data back to people</b>\"."], "q": "Under the course material, what is the maximum GDPR penalty stated?", "opts": ["€1 million or 1%", "€10 million or 2%", "€20 million or 4% of global annual sales", "No financial penalty"], "a": 2}, {"title": "13. DPO, Breach Reporting & Privacy by Design", "section": "Foundation • Privacy & Compliance", "teach": "The Data Protection Officer has advisory, monitoring and contact responsibilities. Privacy by Design means technical and organisational measures are built into data handling.", "deep": ["The \"<b>DPO</b>\" informs/advises, monitors compliance, advises on impact assessments, cooperates with supervisory authorities and acts as a contact point.", "Personal data breaches must be reported to the supervisory authority within \"<b>72 hours</b>\" of becoming aware.", "\"<b>Privacy by Design</b>\" requires appropriate technical and organisational measures.", "Examples given include pseudonymization and data minimization.", "The course highlights lawful, fair and transparent processing and clear purposes for collection."], "q": "How quickly does the course say a personal data breach must be reported?", "opts": ["24 hours", "48 hours", "72 hours", "7 days"], "a": 2}, {"title": "14. Anonymization, Pseudonymization & De-identification", "section": "Foundation • Privacy", "teach": "The key distinction is whether a person can still be identified and whether the transformation can be reversed.", "deep": ["\"<b>Anonymization</b>\" removes PII so the data subject cannot be identified; the course treats it as not personal data under GDPR.", "\"<b>Pseudonymization</b>\" replaces PII with references/keys and remains personal data under GDPR.", "The course compares techniques by reversibility, uniqueness and data-format preservation.", "It lists anonymization, pseudonymization, encryption, randomization, generalization and data masking.", "\"<b>Aggregation</b>\" produces counts/averages at a higher abstraction level; low quantities can still create identification risks.", "Anonymization can reduce value/insight and auditability, while helping compliance and protecting clients."], "q": "Which remains personal data under GDPR according to the course?", "opts": ["Anonymized data", "Pseudonymized data", "Only aggregated data", "None"], "a": 1}, {"title": "15. Ethics, Integrity & Team Dynamics", "section": "Foundation • Professional Ethics", "teach": "The course connects professional integrity with trust, communication, confidentiality and responsible data work.", "deep": ["\"<b>Integrity</b>\" and trust are emphasized as important professional traits.", "The five dysfunctions of a team are \"<b>Absence of trust</b>\", \"<b>Fear of conflict</b>\", \"<b>Lack of commitment</b>\", \"<b>Avoidance of accountability</b>\" and \"<b>Inattention to results</b>\".", "Professionals should communicate clearly, protect confidentiality and question poor-quality data before using it.", "The data scientist perspective says project scope should be respected and deviations escalated appropriately.", "Results should be presented clearly and without bias, and work should be documented before handover."], "q": "What is the foundation of Lencioni's five dysfunctions?", "opts": ["Avoidance of accountability", "Absence of trust", "Lack of commitment", "Inattention to results"], "a": 1}, {"title": "16. Data Integrity, Warehousing & Business Intelligence", "section": "Foundation • BI & Warehousing", "teach": "A data warehouse supports analytical use of structured data. Business Intelligence connects data extraction, modelling and reporting to decision support.", "deep": ["The course distinguishes data integrity from the trustworthiness and correctness of data.", "Data warehouse architecture includes the warehouse database management system and administration.", "Business Intelligence supports descriptive analytics and turns data into decision-support information.", "The course emphasizes data extraction, data modelling and presentation as parts of the BI workflow."], "q": "What is the main purpose of Business Intelligence in the course?", "opts": ["Only storing raw files", "Supporting decisions through analysis and reporting", "Replacing SQL", "Encrypting every record"], "a": 1}, {"title": "17. Data Visualization", "section": "Foundation • Visualization", "teach": "Visualization makes patterns, trends and outliers easier to understand and communicate. The course links visualization to both EDA and stakeholder storytelling.", "deep": ["\"<b>Data visualization</b>\" is the graphical representation of information and data.", "Bar/column charts are useful for comparing categories.", "Line charts are useful for trends over time.", "Scatter plots show relationships/correlation between two numerical variables.", "Histograms show the distribution of a continuous variable.", "Good practice includes clear titles, labelled axes, legends, low clutter and thoughtful colour choices."], "q": "Which chart is best suited to show a trend over time?", "opts": ["Line chart", "Pie chart", "Scatter plot", "Histogram"], "a": 0}, {"title": "18. Probability & Normal Distribution", "section": "Foundation • Statistics", "teach": "Statistics provides the mathematical foundation for data analysis. Probability quantifies likelihood, and the normal distribution is a key model in the course.", "deep": ["Descriptive statistics include mean, median and mode for central tendency.", "Dispersion includes range, variance and standard deviation.", "Mutually exclusive events use the addition rule: P(A∪B)=P(A)+P(B).", "For general overlapping events: P(A∪B)=P(A)+P(B)−P(A∩B).", "The normal distribution is characterised by mean and standard deviation; the course presents it as a bell-shaped distribution where mean, median and mode are equal."], "q": "Which measure describes the spread of data around the mean?", "opts": ["Mean", "Mode", "Standard deviation", "Median"], "a": 2}, {"title": "19. Machine Learning Foundations", "section": "Foundation • ML & AI", "teach": "Machine Learning learns patterns from training data so models can make predictions or decisions on unseen data.", "deep": ["\"<b>Supervised learning</b>\" uses labelled data.", "\"<b>Classification</b>\" predicts categorical labels.", "\"<b>Regression</b>\" predicts continuous numerical values.", "\"<b>Unsupervised learning</b>\" works with unlabeled data to find hidden structure.", "\"<b>Clustering</b>\" groups similar observations.", "\"<b>Dimensionality reduction</b>\" reduces the number of variables while retaining core variance.", "\"<b>Reinforcement learning</b>\" uses interaction, rewards and penalties to learn actions."], "q": "Which task predicts a continuous numerical value?", "opts": ["Classification", "Regression", "Clustering", "Anomaly detection"], "a": 1}, {"title": "20. Training, Validation, Testing & AI", "section": "Foundation • ML & AI", "teach": "A model needs appropriate data splits and evaluation. The material then connects AI to deep learning, neural networks, NLP and computer vision.", "deep": ["Training data is used to learn model parameters.", "Validation data supports model selection/tuning.", "Test data is used to evaluate final performance on unseen data.", "AI is broader than ML; Machine Learning is a subset of AI.", "\"<b>Computer Vision</b>\" enables machines to interpret visual data such as images and video.", "\"<b>Natural Language Processing (NLP)</b>\" enables computers to process and understand human language."], "q": "Which data is primarily used to evaluate final model performance on unseen data?", "opts": ["Training data", "Validation data", "Test data", "Raw input data only"], "a": 2}], "analyst": [{"title": "1. Analyst Role & Data-Driven Decision Making", "section": "Analyst • Foundations", "teach": "The Analyst is positioned as the link between business and data analytics, helping organizations make better business decisions through reports, dashboards and recommendations.", "deep": ["\"<b>Data analysts work with data to help their organizations make better business decisions.</b>\"", "Typical outputs include reports, dashboards and recommendations.", "The role requires business acumen, communication, stakeholder management, presentation, technical know-how, critical thinking and visualization skills.", "The Analyst must translate analysis into information that business stakeholders can use."], "q": "What is a core output of a Data Analyst?", "opts": ["Only source-code libraries", "Reports, dashboards and recommendations", "Only database hardware", "Only network configuration"], "a": 1}, {"title": "2. Programming Languages & the Analyst", "section": "Analyst • Programming", "teach": "The course introduces Python and R as dominant languages in data science and analytics, with different strengths.", "deep": ["\"<b>Python</b>\" is presented as a general-purpose language with data science libraries and rapid prototyping.", "\"<b>R</b>\" is presented as a language for statistical analysis and visualization.", "Python is strong for deep learning, deployment and building broader applications.", "R is strong in statistical modelling and offers tools such as Shiny for dashboards.", "The course also covers Jupyter as an open-source environment for live code, visualization, presentation and machine learning."], "q": "Which language is specifically described as a language for statistical analysis and visualization?", "opts": ["R", "SQL", "HTML", "Git"], "a": 0}, {"title": "3. Software, Algorithms & Programming Language Levels", "section": "Analyst • Programming", "teach": "The material defines software, computer programs and algorithms, then distinguishes low-level and high-level programming languages.", "deep": ["\"<b>Computer software</b>\" consists of encoded information or computer instructions.", "\"<b>Computer program</b>\" is a collection of instructions that performs a specific task.", "\"<b>Algorithm</b>\" is a procedure or formula for solving a problem through a sequence of specified actions.", "The three major families are \"<b>Machine</b>\", \"<b>Assembly</b>\" and \"<b>High-Level</b>\" languages.", "Compiled languages are translated into machine code; interpreted languages are executed by an interpreter."], "q": "What is an algorithm?", "opts": ["A database table", "A step-by-step procedure for solving a problem", "A visualization", "A cloud provider"], "a": 1}, {"title": "4. Python & Development Environments", "section": "Analyst • Python", "teach": "Python is an interpreted high-level general-purpose language. The course emphasizes readability, indentation and multiple programming paradigms.", "deep": ["\"<b>Python</b>\" is an interpreted, high-level, general-purpose language.", "Its design emphasizes \"<b>code readability</b>\" and significant indentation.", "It supports structured/procedural, object-oriented and functional programming.", "Jupyter supports live code, visualizations and presentations; IDEs/editors help write and manage code.", "The material also covers version control and Git as part of professional development."], "q": "What design characteristic of Python is explicitly emphasized?", "opts": ["Code readability", "Binary-only programming", "No indentation", "Only object-oriented programming"], "a": 0}, {"title": "5. Git & Version Control", "section": "Analyst • Professional Tools", "teach": "Version control records code changes so work can be reviewed, shared and recovered. Git is the main version-control tool covered.", "deep": ["Version control helps maintain history and support collaboration.", "Basic workflow includes editing, staging, committing, pulling and pushing.", "A commit is a snapshot in the project history.", "Cloning copies a repository from a remote server.", "Pushing sends local changes to the remote repository.", "Branches provide separate lines of development; the main branch is commonly called main or master."], "q": "Which Git action sends local changes to a remote repository?", "opts": ["Clone", "Push", "Pull", "Branch"], "a": 1}, {"title": "6. Big Data Storage: NoSQL & Cloud", "section": "Analyst • Data Management", "teach": "The Analyst curriculum revisits NoSQL and cloud storage, including why organizations move workloads away from rigid on-premises environments.", "deep": ["\"<b>Key/Value Stores</b>\" store key-value pairs and emphasize performance/scalability.", "\"<b>Document stores</b>\" handle semi-structured JSON/XML and can index internal document structures.", "\"<b>Graph databases</b>\" represent nodes and relationships and are useful for complex relationships.", "\"<b>Wide Column Stores</b>\" use dynamic columns and offer flexibility over traditional relational databases.", "Cloud advantages discussed include scalability, flexibility and unified data ecosystems; drawbacks can include cost, security, network and vendor considerations."], "q": "Which NoSQL type is optimized for complex relationships?", "opts": ["Key/Value", "Document", "Graph", "Wide Column"], "a": 2}, {"title": "7. Power BI Data Workflow", "section": "Analyst • Power BI", "teach": "The analyst workflow can be thought of as prepare, model, visualize, analyze and manage. The course emphasizes understanding where transformations should happen.", "deep": ["\"<b>Prepare</b>\" data for analysis.", "\"<b>Model</b>\" the data to support analytical relationships.", "\"<b>Visualize</b>\" the information clearly.", "\"<b>Analyze</b>\" the resulting data and patterns.", "\"<b>Manage</b>\" the reporting solution and its use.", "Transformations can occur in the source, during extraction, before loading or during modelling.", "Query folding can push compatible transformations back to the source for better performance."], "q": "Why is Query Folding useful?", "opts": ["It deletes all data", "It can push transformation work back to the source", "It replaces the model", "It creates a PowerPoint"], "a": 1}, {"title": "8. Data Modelling & Relationships", "section": "Analyst • Data Modelling", "teach": "A good data model makes analysis faster and easier to interpret. The course covers normalization, relationships and cardinality.", "deep": ["Good models support faster, easier data exploration and interpretation.", "The common relationship is \"<b>many-to-one (*:1)</b>\" or one-to-many.", "\"<b>One-to-one (1:1)</b>\" should be used carefully.", "\"<b>Many-to-many</b>\" can introduce ambiguity and needs careful design.", "Normalization helps reduce redundancy and improve structure.", "The course also links modelling choices to performance and cache efficiency."], "q": "Which relationship cardinality is described as the common one?", "opts": ["Many-to-one (*:1)", "Only 1:1", "Only many-to-many", "No relationships"], "a": 0}, {"title": "9. DAX & Analytical Calculations", "section": "Analyst • Power BI", "teach": "DAX is used in Power BI for analytical calculations. The course distinguishes calculated columns from measures.", "deep": ["Calculated columns are evaluated row by row and stored/materialized.", "Measures are calculated on demand using the current filter context.", "The course discusses DAX as a tool for analytical expressions and Power BI reporting.", "The key conceptual distinction is storage/materialization versus dynamic calculation under filter context."], "q": "Which is evaluated on demand using filter context?", "opts": ["Calculated column", "Measure", "Table name", "Relationship"], "a": 1}, {"title": "10. Visualization & Report Design", "section": "Analyst • Visualization", "teach": "Report design is about communicating useful information, not simply filling a page with visuals.", "deep": ["Consider the audience and correct format.", "Every visual should have a purpose.", "Think about canvas layout, size, position and tab order.", "Accessibility includes focus mode, high-contrast colours, Alt text and themes.", "Navigation can use buttons, drill-through, cross-report drill-through and bookmarks.", "Reports can be sliced, filtered, sorted, personalized with conditional formatting and shared/exported."], "q": "Which is a report-design consideration explicitly listed in the course?", "opts": ["Use every possible visual", "Consider audience and give every visual a purpose", "Hide all filters", "Avoid navigation"], "a": 1}, {"title": "11. Time Series Patterns", "section": "Analyst • Time Series", "teach": "Time series data has distinct patterns. Recognizing the pattern is the first step before decomposition or forecasting.", "deep": ["\"<b>Trend</b>\" is a long-term increase or decrease and does not have to be linear.", "\"<b>Seasonal</b>\" behaviour occurs at a fixed and known frequency such as month or day of week.", "\"<b>Cyclic</b>\" rises and falls without a fixed frequency.", "A time plot shows observations against time; seasonal plots show observations against the seasons in which they occurred."], "q": "Which time-series pattern has a fixed and known frequency?", "opts": ["Trend", "Seasonal", "Cyclic", "Remainder"], "a": 1}, {"title": "12. Time Series Decomposition, Moving Average & STL", "section": "Analyst • Forecasting", "teach": "Decomposition separates time-series behaviour into components so analysts can understand the underlying pattern.", "deep": ["The course uses three components: \"<b>Trend-cycle</b>\", \"<b>Seasonal</b>\" and \"<b>Remainder</b>\".", "A moving average estimates the trend by taking the arithmetic mean over a specified window.", "\"<b>STL</b>\" means Seasonal and Trend decomposition using Loess.", "Loess estimates nonlinear relationships.", "STL produces Trend, Seasonal and Remainder components."], "q": "What does STL stand for?", "opts": ["Standard Trend Logic", "Seasonal and Trend decomposition using Loess", "Statistical Time Learning", "Seasonal Trend Linear"], "a": 1}, {"title": "13. Forecast Evaluation", "section": "Analyst • Forecasting", "teach": "A forecasting model must be evaluated on data that was not used to fit it.", "deep": ["Available data is divided into training and test data.", "Training data estimates model parameters.", "Test data evaluates forecast accuracy.", "\"<b>Backtesting</b>\" evaluates models using historical data; the course also calls this hindcasting in some domains.", "Test data should provide a reliable indication of performance on new data."], "q": "What is backtesting?", "opts": ["Deleting historical data", "Evaluating a forecasting model on historical data", "Training only on future data", "Changing the chart colour"], "a": 1}, {"title": "14. Descriptive Statistics & Distributions", "section": "Analyst • Statistics", "teach": "The Analyst curriculum revisits data types, distributions, skewness, kurtosis, boxplots and correlation.", "deep": ["Measurement scales include Nominal, Ordinal, Interval and Ratio.", "Mean, median and mode describe central tendency; range, variance and standard deviation describe spread.", "\"<b>Skewness</b>\" measures asymmetry of a probability distribution.", "Kurtosis describes distribution tail/peak behaviour; the course discusses mesokurtic, leptokurtic and platykurtic forms.", "A boxplot displays a five-number summary."], "q": "What does skewness measure?", "opts": ["Database size", "Asymmetry of a probability distribution", "Number of rows", "Model training time"], "a": 1}, {"title": "15. Correlation", "section": "Analyst • Statistics", "teach": "Correlation measures association between variables. The course stresses that correlation must not be confused with causation.", "deep": ["Pearson correlation measures linear association.", "Spearman correlation measures monotonic/rank association.", "A positive correlation means variables tend to move in the same direction.", "\"Correlation does NOT imply causation.\"", "Correlation coefficients are used to quantify the degree of relationship."], "q": "What does correlation NOT automatically prove?", "opts": ["Association", "A relationship in the data", "Causation", "Direction of movement"], "a": 2}, {"title": "16. Machine Learning Workflow", "section": "Analyst • Machine Learning", "teach": "Machine learning learns rules from data rather than relying only on manually programmed rules. Training, validation and testing are central.", "deep": ["Traditional programming starts with rules written by people and data as input.", "Machine learning uses training data to learn model parameters.", "Validation data supports model selection and tuning.", "Test data measures generalization on unseen data.", "The course separates supervised, unsupervised and reinforcement learning."], "q": "What is the purpose of the test dataset?", "opts": ["Train the model parameters", "Evaluate performance on unseen data", "Create a dashboard", "Replace validation"], "a": 1}, {"title": "17. Supervised vs Unsupervised Learning", "section": "Analyst • Machine Learning", "teach": "The key distinction is whether labelled answers are available.", "deep": ["\"<b>Supervised learning</b>\" uses labelled data and includes classification and regression.", "\"<b>Unsupervised learning</b>\" finds patterns in unlabeled data.", "Classification predicts categorical classes.", "Regression predicts continuous numerical outcomes.", "Clustering and anomaly detection are important unsupervised applications."], "q": "Which learning type uses labelled examples?", "opts": ["Supervised", "Unsupervised", "Only reinforcement", "Neither"], "a": 0}, {"title": "18. Clustering & K-Means", "section": "Analyst • Machine Learning", "teach": "Clustering groups observations without pre-existing labels. K-Means is a central centroid-based clustering algorithm in the material.", "deep": ["\"<b>K-Means Clustering</b>\" partitions data into K clusters.", "K-Means is centroid-based and requires choosing K.", "Distance measures can include Euclidean, Manhattan and Cosine distance.", "The course also covers DBSCAN as a density-based approach that can identify arbitrary shapes and noise."], "q": "Which algorithm is centroid-based and requires choosing K?", "opts": ["DBSCAN", "K-Means", "PCA", "Linear regression"], "a": 1}, {"title": "19. Decision Trees & Ensemble Thinking", "section": "Analyst • Machine Learning", "teach": "Decision trees split observations using features. The course connects splitting to impurity and information gain, and discusses combining model predictions.", "deep": ["Decision trees use feature-based splits to make decisions.", "\"<b>Entropy</b>\" represents impurity/uncertainty.", "\"<b>Information Gain</b>\" represents the reduction in entropy from a split.", "\"<b>Gini impurity</b>\" is another impurity measure.", "Ensemble methods combine predictions from multiple models to improve accuracy/stability."], "q": "What does Information Gain measure in a decision tree?", "opts": ["Database growth", "Reduction in entropy after a split", "Number of charts", "Cloud storage"], "a": 1}, {"title": "20. Model Evaluation Metrics", "section": "Analyst • Machine Learning", "teach": "Evaluation metrics tell you how a model performs and what kinds of mistakes it makes.", "deep": ["A confusion matrix contains True Positive, True Negative, False Positive and False Negative outcomes.", "\"<b>Precision</b>\" = TP / (TP + FP).", "\"<b>Recall</b>\" = TP / (TP + FN).", "F1-score combines precision and recall through their harmonic mean.", "For regression, Mean Squared Error penalizes large errors strongly."], "q": "What does Recall measure?", "opts": ["Correct positives out of predicted positives", "Actual positives correctly identified", "Average salary", "Number of clusters"], "a": 1}, {"title": "21. Artificial Intelligence, Computer Vision & NLP", "section": "Analyst • Artificial Intelligence", "teach": "AI is broader than machine learning. The course highlights computer vision and natural language processing as important applications.", "deep": ["AI is described as systems with the ability to sense, reason, engage and learn.", "Machine Learning is a subset of AI focused on learning from data.", "\"<b>Computer Vision</b>\" enables machines to analyse and understand images/video.", "Applications include facial recognition, augmented reality, autonomous vehicles and biomedical image processing.", "\"<b>Natural Language Processing (NLP)</b>\" enables machines to process and understand human language.", "Applications include machine translation, chatbots, text prediction, sentiment analysis, text classification and speech recognition."], "q": "Which AI field focuses on understanding images and video?", "opts": ["NLP", "Computer Vision", "SQL", "ETL"], "a": 1}], "reviews": [{"q": "Memory Check: What are the 5 Vs of Big Data?", "opts": ["Volume, Velocity, Variety, Veracity, Value", "Value, Vision, Version, Volume, Velocity", "Volume, Variety, Validation, Version, Value", "Velocity, Views, Value, Vision, Veracity"], "a": 0}, {"q": "Memory Check: Which CRISP-DM phase evaluates how well a model performs?", "opts": ["Business understanding", "Data preparation", "Evaluation", "Deployment"], "a": 2}, {"q": "Memory Check: Which measurement scale has a true zero?", "opts": ["Nominal", "Ordinal", "Interval", "Ratio"], "a": 3}, {"q": "Memory Check: Which system handles real-time operational transactions?", "opts": ["OLAP", "OLTP", "ETL", "Data Lake"], "a": 1}, {"q": "Memory Check: Which learning type uses labelled data?", "opts": ["Unsupervised", "Supervised", "Reinforcement only", "Clustering"], "a": 1}, {"q": "Memory Check: Which chart is best for a trend over time?", "opts": ["Histogram", "Line", "Pie", "Scatter"], "a": 1}]};
+
+
+let track = 'foundation';
+let current = 0;
+let started = false;
+let completed = [];
+let visited = new Set();
+let flowIndex = 0;
+let lastQuizCorrect = false;
+let reviewCursor = 0;
+let memoryBankIndex = 0;
+
+function setTrack(t){
+  track=t;
+  current=0;
+  started=false;
+  completed=[];
+  visited=new Set();
+  flowIndex=0;
+  lastQuizCorrect=false;
+  reviewCursor=0;
+  memoryBankIndex=0;
+
+  const f=document.getElementById('track-foundation');
+  const a=document.getElementById('track-analyst');
+
+  f.className=t==='foundation'
+    ? 'track-btn bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2.5 rounded-xl text-xs font-black'
+    : 'track-btn text-purple-300 hover:text-white px-4 py-2.5 rounded-xl text-xs font-black';
+
+  a.className=t==='analyst'
+    ? 'track-btn bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2.5 rounded-xl text-xs font-black'
+    : 'track-btn text-purple-300 hover:text-white px-4 py-2.5 rounded-xl text-xs font-black';
+
+  const name=t==='foundation'?'Foundation':'Analyst';
+  document.getElementById('welcome-title').innerText='MASET '+name+' Journey';
+  document.getElementById('welcome-text').innerText=
+    'A continuous learning path based on your course material. Learn several short ideas, get a related Pro Tip, answer a checkpoint, then continue. Every lesson remains revisitable.';
+  document.getElementById('journey').classList.add('hidden');
+  document.getElementById('progress-area').classList.add('hidden');
+  document.getElementById('welcome').classList.remove('hidden');
+}
+
+function lessons(){ return DATA[track] || []; }
+
+function startJourney(){
+  started=true;
+  current=0;
+  completed=[];
+  visited=new Set([0]);
+  flowIndex=0;
+  lastQuizCorrect=false;
+  reviewCursor=0;
+  memoryBankIndex=0;
+  document.getElementById('welcome').classList.add('hidden');
+  document.getElementById('progress-area').classList.remove('hidden');
+  document.getElementById('journey').classList.remove('hidden');
+  renderJourney();
+}
+
+function restartJourney(){ startJourney(); }
+
+function lessonId(i){ return `${track}-${i}`; }
+
+function completeCurrentLesson(){
+  if(!completed.includes(current)) completed.push(current);
+}
+
+function buildProTip(lesson, index){
+  const title=(lesson.title||'').toLowerCase();
+  const teach=String(lesson.teach||'');
+  const deep=(lesson.deep||[]).join(' ');
+  const source=(teach+' '+deep).toLowerCase();
+
+  // Topic-aligned, concrete tips. These are derived from the supplied course material.
+  if(title.includes('data science') && title.includes('what'))
+    return `Think of data science as a chain: <b>prepare → analyse → predict → validate → communicate</b>. For example, a company could clean sales data, detect a demand pattern, forecast next month's demand, test whether the model is reliable, then present the finding to management.`;
+  if(title.includes('lifecycle'))
+    return `The important exam idea is that the lifecycle is <b>not a one-way checklist</b>. If evaluation shows a poor result, you may go back to preparation or modelling. The course explicitly describes it as iterative rather than “set in stone.”`;
+  if(title.includes('big data') && title.includes('what'))
+    return `A useful way to remember Big Data is not “big = many rows”. The course stresses growth, many sources and the difficulty of collecting, storing, managing and analysing them together. A company receiving data from customers, mobile devices, machines and social media is a good example.`;
+  if(title.includes('5 vs'))
+    return `<b>Memory shortcut:</b> Volume = how much, Velocity = how fast, Variety = what types, Veracity = how trustworthy, Value = why it matters. Example: a live social-media stream has high <b>Velocity</b>; unreliable sensor readings raise a <b>Veracity</b> issue.`;
+  if(title.includes('architecture') || title.includes('cloud') || title.includes('data lakes'))
+    return `<b>Schema-on-read</b> means the data can be stored first and interpreted when needed; <b>schema-on-write</b> means structure is defined before loading. The practical lesson is flexibility versus stronger upfront structure. A well-governed Data Lake can become a Data Swamp if ingestion, metadata and access controls are neglected.`;
+  if(title.includes('oltp') || title.includes('olap'))
+    return `<b>OLTP = Online Transaction Processing</b> → operational, frequent transactions such as an order being created. <b>OLAP = Online Analytical Processing</b> → analytical queries over historical/aggregated data. A common flow in the course is <b>OLTP → ETL → OLAP/data warehouse</b>.`;
+  if(title.includes('analytics') && title.includes('four'))
+    return `Use the question to identify the type: <b>Descriptive = what happened?</b> <b>Diagnostic = why?</b> <b>Predictive = what is likely to happen?</b> <b>Prescriptive = what should we do?</b>. For example, a dashboard of last month's sales is descriptive; a recommended price change is prescriptive.`;
+  if(title.includes('business objectives'))
+    return `<b>SMART</b> means Specific, Measurable, Achievable, Realistic and Time-related. A vague goal like “improve sales” is weak. “Increase repeat orders by 10% in six months” is much closer to a measurable business objective.`;
+  if(title.includes('quantitative') || title.includes('qualitative'))
+    return `Think <b>quantitative = numbers you can count or measure</b>; <b>qualitative = descriptions that help explain thoughts, experiences and context</b>. Surveys with numeric ratings can be quantitative, while interviews can provide qualitative insight.`;
+  if(title.includes('data science tools') || title.includes('tools'))
+    return `Do not memorize tools as a random list. Link each tool to its role: <b>SAS</b> for statistical work, <b>Spark</b> for large-scale/batch/stream processing, <b>Matplotlib</b> for Python plotting, <b>ggplot2</b> for R visualisation, <b>TensorFlow</b> for machine learning/deep learning, <b>Jupyter</b> for interactive notebooks, and <b>RStudio</b> as an R workbench.`;
+  if(title.includes('programming'))
+    return `A useful exam distinction is <b>Python = general-purpose and strongly used for data science/deep learning</b>, while <b>R = especially strong in statistical modelling and visualisation</b>. The course also notes that Python has an advantage for broader application deployment.`;
+  if(title.includes('software') || title.includes('algorithm'))
+    return `<b>Software</b> is the broader collection of programs, libraries and related data. A <b>computer program</b> is a collection of instructions for a specific task. An <b>algorithm</b> is the step-by-step procedure for solving a problem. Think: algorithm = recipe, program = implemented recipe, software = collection of implemented tools.`;
+  if(title.includes('classification') || title.includes('machine language') || title.includes('compiled'))
+    return `<b>Low-level → closer to hardware; high-level → more abstraction.</b> Machine language is directly executable binary instructions. Assembly is closer to hardware than high-level languages. A compiler translates a program as a build step, while an interpreter reads and executes source code.`;
+  if(title.includes('python'))
+    return `Python is called an <b>interpreted high-level general-purpose language</b> in the course. Its notable use of <b>significant indentation</b> is important: indentation is part of the program structure, not just visual formatting.`;
+  if(title.includes('data mining'))
+    return `The course treats <b>Data Mining</b> as discovering hidden patterns or trends, mostly in structured data, without needing a preconceived hypothesis. That is why it is closely associated with <b>Exploratory Data Analysis (EDA)</b>: the analyst is looking for what the data reveals.`;
+  if(title.includes('database') && title.includes('rdbms'))
+    return `A relational database organises structured information into <b>tables → rows → columns</b>. Tables can be related through a common field. <b>RDBMS</b> means Relational Database Management System — software such as MySQL, Oracle or SQL Server that manages those relational databases.`;
+  if(title.includes('sql'))
+    return `<b>SQL = Structured Query Language.</b> It is the standard language for relational databases. The course notes ANSI standardisation in 1986 and ISO standardisation in 1987. SQL can retrieve, define and manipulate data and can also create database objects such as tables and views.`;
+  if(title.includes('nosql'))
+    return `<b>NoSQL = Not Only SQL.</b> The course connects its rise to internet-scale, unstructured and semi-structured data. The four types to associate are <b>Key/Value, Document, Graph, Wide Column</b>. The key distinction is the type of structure each model is optimised to represent.`;
+  if(title.includes('data management') || title.includes('governance'))
+    return `<b>DAMA-DMBOK</b> is the Data Management Body of Knowledge. The course places <b>Data Governance at the heart of data management</b>. Governance is about who has authority and control over data, and how that data may be used.`;
+  if(title.includes('data quality'))
+    return `<b>Data quality</b> is not just “accurate”. The course lists accuracy, completeness, consistency, reliability and being up to date. A dataset can be numerically correct but still unusable if it is incomplete or inconsistent.`;
+  if(title.includes('privacy') || title.includes('gdpr'))
+    return `<b>GDPR</b> is about controlling how personal data is processed. A few high-value memory anchors from the course are <b>PII</b>, lawful/fair/transparent processing, data minimisation, the <b>right to be forgotten</b>, the <b>72-hour breach reporting</b> period, and the distinction between anonymisation and pseudonymisation.`;
+  if(title.includes('ethics'))
+    return `The course links professional ethics to <b>integrity, trust, reliability, honesty, consistency, communication and confidentiality</b>. A practical example: if data quality is questionable, the data professional should raise the issue rather than silently producing a confident-looking result.`;
+  if(title.includes('visual'))
+    return `<b>Choose the visual for the analytical question.</b> Bar/column → compare categories. Line → trend over time. Scatter → relationship between two numerical variables. Histogram → distribution. The course also stresses clear titles, labels, legends, avoiding clutter and considering accessibility.`;
+  if(title.includes('time series'))
+    return `<b>Trend</b> is long-term movement. <b>Seasonal</b> repeats at a known frequency. <b>Cyclic</b> rises and falls without a fixed frequency. For forecasting, keep the components separate in your mind because each implies a different kind of behaviour.`;
+  if(title.includes('decomposition') || title.includes('stl'))
+    return `<b>STL = Seasonal and Trend decomposition using Loess.</b> It separates a series into Trend, Seasonal and Remainder components. The course also introduces moving averages to estimate the trend.`;
+  if(title.includes('forecast evaluation') || title.includes('backtesting'))
+    return `A model that fits old data well is not automatically a good forecasting model. The course requires <b>training data</b> to estimate parameters and separate <b>test data</b> to evaluate accuracy. <b>Backtesting</b> asks: “How would this model have performed on historical periods?”`;
+  if(title.includes('statistics') || title.includes('distributions'))
+    return `<b>Central tendency</b> = mean, median, mode. <b>Dispersion</b> = range, variance, standard deviation. For scales, remember the “zero” distinction: <b>Interval has no true zero; Ratio has a true zero.</b>`;
+  if(title.includes('correlation'))
+    return `<b>Correlation ≠ causation.</b> Pearson is used for linear correlation; Spearman is used for monotonic/rank correlation. If two variables move together, that shows association — not necessarily that one variable caused the other.`;
+  if(title.includes('machine learning workflow'))
+    return `<b>Training</b> learns model parameters, <b>validation</b> supports selection/tuning, and <b>test</b> checks performance on unseen data. Mixing these roles can create overly optimistic results.`;
+  if(title.includes('supervised') || title.includes('unsupervised'))
+    return `<b>Supervised = labelled answers are available.</b> Classification predicts categories; regression predicts continuous numbers. <b>Unsupervised = no labels</b>, so the algorithm searches for structure such as clusters or anomalies.`;
+  if(title.includes('k-means'))
+    return `<b>K-Means</b> is centroid-based and requires choosing K. Think “place K centres, assign points, update centres, repeat.” <b>DBSCAN</b> is different: it uses density and can identify arbitrary-shaped clusters and noise.`;
+  if(title.includes('decision trees'))
+    return `<b>Entropy</b> represents uncertainty/impurity. <b>Information Gain</b> is the reduction in entropy created by a split. <b>Gini impurity</b> is another way to measure classification impurity. These terms are easy to mix up, so always connect “gain” with “reduction”.`;
+  if(title.includes('evaluation metrics'))
+    return `<b>Precision</b> asks: “Of the positives I predicted, how many were actually positive?” <b>Recall</b> asks: “Of all actual positives, how many did I find?” That distinction is often more useful than memorising the formulas in isolation.`;
+  if(title.includes('artificial intelligence') || title.includes('nlp') || title.includes('computer vision'))
+    return `<b>NLP = Natural Language Processing</b> → human language. <b>Computer Vision</b> → images/video. The course examples include translation, sentiment analysis, chatbots and speech recognition for NLP, and facial recognition, autonomous vehicles and image processing for Computer Vision.`;
+
+  return `Study this concept by connecting the definition to one concrete workplace example. Ask yourself: <b>what problem does this concept solve, and what would I expect to see if it were used correctly?</b>`;
+}
+
+function buildMemoryCheck(index){
+  const reviews=DATA.reviews||[];
+  if(!reviews.length || index<=0) return null;
+  const reviewIndex=Math.floor(index/3)%reviews.length;
+  const source=reviews[reviewIndex];
+  return {...source, kind:'memory'};
+}
+
+function escapeHtml2(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function highlightKeyPhrase(text){
+  const raw=String(text||'').trim();
+  if(!raw) return '';
+  if(/<b>|<strong>|<span/i.test(raw)) return raw;
+  const words=raw.split(/\s+/);
+  const take=Math.min(4, Math.max(2, words.length>8 ? 4 : 2));
+  const key=words.slice(0,take).join(' ');
+  const rest=words.slice(take).join(' ');
+  return `<span class="key-inline">${escapeHtml2(key)}</span>${rest?' '+escapeHtml2(rest):''}`;
+}
+
+function noteExplanation(item, lesson){
+  const t=String(item||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+  const low=t.toLowerCase();
+  if(low.includes('data science') || low.includes('scientific method'))
+    return 'In simple terms, this means <b>data science connects several skills</b> instead of relying on one tool. The important flow is to move from raw information to a finding that can support a business decision.';
+  if(low.includes('preparing') || low.includes('data preparation') || low.includes('clean'))
+    return 'This step is about getting the data into a condition where the analysis can be trusted. Think about <b>structure, quality, consistency and suitability</b> before applying a model or drawing a conclusion.';
+  if(low.includes('prediction') || low.includes('forecast'))
+    return 'A prediction is not simply a guess. It is a <b>model-based estimate of a future or unknown outcome</b>, supported by the patterns found in the data.';
+  if(low.includes('validat'))
+    return 'Validation asks whether the result is <b>credible and fit for purpose</b>. A model can produce an answer and still be unsuitable if its assumptions, data or performance are weak.';
+  if(low.includes('present') || low.includes('visual'))
+    return 'The final result must be understandable to the people who use it. This is why the course connects <b>analysis with communication</b>, not just technical computation.';
+  if(low.includes('lifecycle') || low.includes('discovery') || low.includes('plan model') || low.includes('build model'))
+    return 'Think of this as part of a <b>feedback loop</b>. What you learn later can change what you thought earlier, so the workflow can move backward and forward rather than behaving like a one-time checklist.';
+  if(low.includes('volume') || low.includes('velocity') || low.includes('variety') || low.includes('veracity') || low.includes('value'))
+    return 'This is one dimension of the <b>5 Vs</b>. The easiest way to understand it is to ask what problem it represents: amount, speed, data type, trustworthiness, or business usefulness.';
+  if(low.includes('oltp'))
+    return '<b>OLTP</b> is about keeping day-to-day operations running. Think of many small transactions such as creating orders, updating accounts or recording payments.';
+  if(low.includes('olap'))
+    return '<b>OLAP</b> is about analysing accumulated information. Instead of recording one transaction, it helps answer questions such as totals, trends and historical comparisons.';
+  if(low.includes('etl'))
+    return '<b>ETL = Extract, Transform, Load.</b> The key idea is that data is taken from source systems, prepared into a usable form, and then loaded into a target analytical environment.';
+  if(low.includes('data lake'))
+    return 'A Data Lake is useful when an organization needs <b>flexible storage for raw data</b>. The course stresses that management, governance and metadata are what stop that flexible storage from becoming difficult to use.';
+  if(low.includes('data swamp'))
+    return 'A Data Swamp is what happens when stored data becomes <b>hard to find, hard to trust or hard to access</b>. The storage exists, but the analytical value becomes difficult to realize.';
+  if(low.includes('descriptive'))
+    return '<b>Descriptive analytics</b> answers “what happened?” It is focused on describing historical and current states using trends, patterns and summaries.';
+  if(low.includes('diagnostic'))
+    return '<b>Diagnostic analytics</b> moves one step deeper: “why did it happen?” It tries to identify the factors or causes behind observed performance.';
+  if(low.includes('predictive'))
+    return '<b>Predictive analytics</b> asks “what is likely to happen?” It uses modelling, forecasting and machine learning to estimate future outcomes.';
+  if(low.includes('prescriptive'))
+    return '<b>Prescriptive analytics</b> asks “what should we do?” The result is a recommendation or action designed to achieve a desired outcome.';
+  if(low.includes('crisp-dm') || low.includes('business understanding') || low.includes('data understanding') || low.includes('modelling') || low.includes('deployment'))
+    return '<b>CRISP-DM</b> means Cross-Industry Standard Process for Data Mining. It turns an analytical idea into a repeatable cycle: understand the business, understand and prepare the data, model it, evaluate the result and deploy it.';
+  if(low.includes('smart'))
+    return '<b>SMART</b> turns a vague business intention into something testable. The course uses Specific, Measurable, Achievable, Realistic and Time-related so the objective has a clear target and timeframe.';
+  if(low.includes('nominal'))
+    return '<b>Nominal</b> is category without order. “Department = Finance, HR, IT” is a simple example: the labels are different, but one is not mathematically higher than another.';
+  if(low.includes('ordinal'))
+    return '<b>Ordinal</b> adds order, but the gaps are not numerically meaningful. A satisfaction rating such as poor → fair → good → excellent is the classic idea.';
+  if(low.includes('interval'))
+    return '<b>Interval</b> has ordered values and equal differences, but no true zero. The absence of a true zero is what separates it from ratio data.';
+  if(low.includes('ratio'))
+    return '<b>Ratio</b> has ordered values, equal intervals and a true zero. That makes statements such as “twice as much” meaningful.';
+  if(low.includes('data governance'))
+    return '<b>Data Governance</b> defines who has authority and control over data, plus how that data may be used. Think of it as the organization’s rules and accountability around data assets.';
+  if(low.includes('data quality'))
+    return 'Data quality is about whether the data is <b>fit for its intended purpose</b>. Accuracy, completeness, consistency and reliability all matter because poor input can undermine downstream analysis.';
+  if(low.includes('privacy') || low.includes('gdpr'))
+    return 'Privacy is not simply about hiding data. The course connects it to <b>proper use, control, purpose and protection of personal information</b>, especially under GDPR.';
+  if(low.includes('anonym'))
+    return 'Anonymization aims to remove the ability to identify the person. The course distinguishes it from pseudonymization, where a separate key can still reconnect the record to the person.';
+  if(low.includes('pseudonym'))
+    return 'Pseudonymization replaces direct identifiers with references or keys. It can reduce exposure while preserving analytical relationships, but the data still remains personal data under GDPR.';
+  if(low.includes('machine learning') || low.includes('supervised') || low.includes('unsupervised'))
+    return 'The central distinction is whether the training data already contains the <b>known answer</b>. Supervised learning uses labelled examples; unsupervised learning looks for structure without those labels.';
+  if(low.includes('classification'))
+    return '<b>Classification</b> predicts a category. The output is a class such as spam/not spam, high/low risk or approved/rejected.';
+  if(low.includes('regression'))
+    return '<b>Regression</b> predicts a continuous numerical value. Examples include price, demand, temperature or revenue.';
+  if(low.includes('reinforcement'))
+    return '<b>Reinforcement learning</b> uses an agent interacting with an environment, where actions lead to rewards or penalties that guide future behaviour.';
+  if(low.includes('jupyter'))
+    return '<b>Jupyter</b> is an interactive environment where code, visualizations and explanatory text can sit together. That makes it useful for experimentation and data storytelling.';
+  if(low.includes('python'))
+    return '<b>Python</b> is presented as a general-purpose language with a strong data-science ecosystem and emphasis on readability. Its broader application use is an important distinction from more specialized statistical tooling.';
+  if(low.includes('rstudio') || low==='r')
+    return '<b>R</b> is strongly associated with statistics and visualization in the course, while <b>RStudio</b> is the working environment that brings coding, plots, packages and related tools together.';
+  if(low.includes('algorithm'))
+    return 'An <b>algorithm</b> is a step-by-step procedure for solving a problem. The important idea is sequence: define an input, apply a repeatable set of operations and produce an outcome.';
+  if(low.includes('gpu'))
+    return '<b>GPU</b> means Graphics Processing Unit. Its advantage is parallel computation, so it can accelerate workloads where many similar calculations can happen at the same time.';
+  if(low.includes('sql'))
+    return '<b>SQL = Structured Query Language.</b> In this course it is the standard language for interacting with relational databases, including retrieving, defining and manipulating data.';
+  if(low.includes('nosql'))
+    return '<b>NoSQL</b> is a family of non-relational approaches designed for flexible handling of unstructured or semi-structured data. The course emphasizes its four main models rather than treating it as one single database product.';
+  if(low.includes('graph database'))
+    return 'A <b>graph database</b> represents records as nodes and their relationships as edges/arcs. This is especially useful when the relationship itself is central to the analysis.';
+  if(low.includes('document'))
+    return 'A <b>document store</b> keeps semi-structured documents such as JSON or XML. The document structure itself can be used for indexing and optimization.';
+  if(low.includes('key/value'))
+    return 'A <b>key/value store</b> keeps simple pairs: one key points to one value. Its simplicity supports very fast retrieval and strong scalability.';
+  if(low.includes('wide column'))
+    return '<b>Wide Column Stores</b> use dynamic columns, allowing different rows to have different sets of columns. That flexibility is useful for very large distributed datasets.';
+  return 'This point adds an important part of the course definition. The practical way to understand it is to connect the <b>term</b> to what it does, why it matters and where it would appear in a real data workflow.';
+}
+
+function noteExample(item, lesson){
+  const t=String(item||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().toLowerCase();
+  if(t.includes('oltp')) return '<b>Example:</b> An ERP records a new customer order — that is an operational transaction.';
+  if(t.includes('olap')) return '<b>Example:</b> Management compares five years of sales by region — that is analytical use.';
+  if(t.includes('etl')) return '<b>Example:</b> Extract sales from an ERP, transform dates/currencies, then load the cleaned data into a warehouse.';
+  if(t.includes('volume')) return '<b>Example:</b> Years of transaction records accumulating into terabytes is a Volume problem.';
+  if(t.includes('velocity')) return '<b>Example:</b> Sensor readings arriving every second create a high-velocity stream.';
+  if(t.includes('variety')) return '<b>Example:</b> A company combines SQL tables, JSON logs, images and video — multiple data formats.';
+  if(t.includes('veracity')) return '<b>Example:</b> Two systems report different customer addresses — trustworthiness becomes the issue.';
+  if(t.includes('value')) return '<b>Example:</b> Clickstream data is only valuable when it produces an insight that improves a business decision.';
+  if(t.includes('data lake')) return '<b>Example:</b> Raw files from many sources can be stored centrally first, then interpreted when analysts need them.';
+  if(t.includes('data swamp')) return '<b>Example:</b> The company has thousands of files but nobody knows what they mean or where the trusted version is.';
+  if(t.includes('descriptive')) return '<b>Example:</b> “Revenue fell 8% last quarter” describes what happened.';
+  if(t.includes('diagnostic')) return '<b>Example:</b> “Revenue fell because two major customers stopped ordering” explains why it happened.';
+  if(t.includes('predictive')) return '<b>Example:</b> “Demand is expected to rise next month” is a prediction.';
+  if(t.includes('prescriptive')) return '<b>Example:</b> “Increase stock by 10% in these locations” is a recommendation about what to do.';
+  if(t.includes('nominal')) return '<b>Example:</b> Department = Finance / HR / IT. The categories have no numeric order.';
+  if(t.includes('ordinal')) return '<b>Example:</b> Service rating = poor / fair / good / excellent. There is an order, but the gap is not a measured quantity.';
+  if(t.includes('interval')) return '<b>Example:</b> Temperature in Celsius has meaningful differences, but 0°C is not an absolute absence of temperature.';
+  if(t.includes('ratio')) return '<b>Example:</b> Weight has a true zero, so 20 kg is meaningfully twice 10 kg.';
+  if(t.includes('python')) return '<b>Example:</b> Python can load a CSV, clean the data, calculate statistics and build a model in one workflow.';
+  if(t.includes('jupyter')) return '<b>Example:</b> A notebook can place a Python cell, its chart and your written interpretation directly beside each other.';
+  if(t.includes('algorithm')) return '<b>Example:</b> A cooking recipe is an everyday algorithm: follow steps in a defined sequence to reach an outcome.';
+  if(t.includes('gpu')) return '<b>Example:</b> Image or deep-learning workloads can benefit from many calculations running in parallel.';
+  if(t.includes('classification')) return '<b>Example:</b> Predict whether a transaction is legitimate or fraudulent.';
+  if(t.includes('regression')) return '<b>Example:</b> Predict next month’s sales amount as a number.';
+  if(t.includes('reinforcement')) return '<b>Example:</b> An agent learns which action earns a higher reward by repeatedly interacting with its environment.';
+  if(t.includes('gdpr') || t.includes('privacy')) return '<b>Example:</b> A company collecting customer details must use and protect that information for a clear, lawful purpose.';
+  return '<b>Example:</b> Imagine this concept being used in a real organization: identify the data, apply the concept, then check whether the result supports a business decision.';
+}
+
+function buildProTipForNote(item, lesson, noteIndex){
+  const text=String(item||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+  const low=text.toLowerCase();
+  if(low.includes('preparing data')) return '<b>Pro Tip — Think “before the model”.</b> Data preparation is where raw information is made usable. Missing values, inconsistent formats and duplicated records can change the result before any algorithm is applied.';
+  if(low.includes('validating the results')) return '<b>Pro Tip — A plausible answer is not automatically a valid answer.</b> Validation asks whether the result is trustworthy enough for its intended business use.';
+  if(low.includes('predictions')) return '<b>Pro Tip — Prediction points forward.</b> In an exam question, words such as “likely”, “future”, “forecast” or “expected” are strong clues that the question is describing predictive work.';
+  if(low.includes('presenting the results')) return '<b>Pro Tip — Analysis only creates value when someone can act on it.</b> The course deliberately connects technical analysis with clear visual communication and stakeholder understanding.';
+  if(low.includes('not set in stone')) return '<b>Pro Tip — Watch for the exam trap “linear”.</b> The course explicitly says the lifecycle can move backward, forward, overlap or restart when new information appears.';
+  if(low.includes('scalability')) return '<b>Pro Tip — Scalability is about growing without redesigning the whole approach.</b> The course links Big Data scalability to computation and storage scaling across distributed infrastructure.';
+  if(low.includes('flexibility')) return '<b>Pro Tip — Flexibility does not mean “no structure”.</b> It means the data format does not have to be fully fixed before storage, which is why Big Data is associated with dynamic schemas.';
+  if(low.includes('limitless')) return '<b>Pro Tip — “Limitless” is an architectural idea, not literally infinite storage.</b> The lesson is contrasting Big Data environments with rigid, predefined capacity limits.';
+  if(low.includes('volume')) return '<b>Pro Tip — Volume = how much.</b> If the question focuses on terabytes, records, files or overall scale, think Volume first.';
+  if(low.includes('velocity')) return '<b>Pro Tip — Velocity = how fast.</b> Batch, real-time and streaming language usually points toward the speed at which data is generated or processed.';
+  if(low.includes('variety')) return '<b>Pro Tip — Variety = how many forms.</b> Structured tables, JSON/XML, images, audio and video together are a Variety problem.';
+  if(low.includes('veracity')) return '<b>Pro Tip — Veracity = can I trust it?</b> Accuracy, origin, authenticity and reliability all sit inside the idea of data trustworthiness.';
+  if(low.includes('value')) return '<b>Pro Tip — Value is the “so what?”.</b> Big Data creates business value only when analysis produces useful insight or action.';
+  if(low.includes('oltp')) return '<b>Pro Tip — OLTP protects operations.</b> Think “record the transaction quickly and correctly” rather than “analyse years of history”.';
+  if(low.includes('olap')) return '<b>Pro Tip — OLAP answers business questions about accumulated data.</b> Historical aggregation and complex analysis are the signals to look for.';
+  if(low.includes('etl')) return '<b>Pro Tip — Remember the direction: Extract → Transform → Load.</b> The order describes moving data from source systems into an analytical target after preparation.';
+  if(low.includes('schema-on-read')) return '<b>Pro Tip — Read is when you interpret.</b> Schema-on-read supports flexible storage of raw data before a user decides exactly how to structure it for a particular analysis.';
+  if(low.includes('data swamp')) return '<b>Pro Tip — A swamp is not just “too much data”.</b> The exam-relevant idea is unmanaged data: broken ingestion, difficult access, weak governance and poor metadata.';
+  if(low.includes('descriptive')) return '<b>Pro Tip — Descriptive = past/present description.</b> It tells you what happened or what is happening; it does not primarily explain why or recommend what to do.';
+  if(low.includes('diagnostic')) return '<b>Pro Tip — Diagnostic = cause.</b> When the question asks why a result occurred or investigates drivers behind performance, think Diagnostic.';
+  if(low.includes('predictive')) return '<b>Pro Tip — Predictive = future likelihood.</b> Statistical modelling, forecasting and machine learning are common methods named in the course.';
+  if(low.includes('prescriptive')) return '<b>Pro Tip — Prescriptive = action.</b> If the answer is a recommendation or rule designed to achieve an outcome, the concept is prescriptive.';
+  if(low.includes('crisp-dm')) return '<b>Pro Tip — CRISP-DM is a cycle, not six unrelated definitions.</b> Think business problem → data → preparation → model → evaluation → deployment, then loop back as needed.';
+  if(low.includes('business understanding')) return '<b>Pro Tip — Start with the business question.</b> A technically impressive analysis is still weak if it does not address the actual business objective.';
+  if(low.includes('smart')) return '<b>Pro Tip — SMART prevents vague objectives.</b> “Improve sales” lacks precision; a SMART objective adds a measurable target and a time boundary.';
+  if(low.includes('nominal')) return '<b>Pro Tip — Nominal = name only.</b> There is no ranking between categories, so “Finance” is not mathematically greater than “HR”.';
+  if(low.includes('ordinal')) return '<b>Pro Tip — Ordinal = order, not measured distance.</b> You know which category is higher or lower, but not by how much.';
+  if(low.includes('interval')) return '<b>Pro Tip — Interval’s exam clue is the missing true zero.</b> Equal differences exist, but zero does not represent complete absence of the quantity.';
+  if(low.includes('ratio')) return '<b>Pro Tip — Ratio adds a true zero.</b> That makes multiplication statements such as “twice as much” meaningful.';
+  if(low.includes('data governance')) return '<b>Pro Tip — Governance is about authority and control.</b> It connects people, processes and technologies so data can be managed and used appropriately.';
+  if(low.includes('data quality')) return '<b>Pro Tip — Quality is always purpose-dependent.</b> Data can be technically complete and still be unsuitable for the decision you want to make.';
+  if(low.includes('gdpr')) return '<b>Pro Tip — GDPR questions often test distinctions.</b> Memorize the difference between personal data, sensitive categories, purpose, consent, minimization, the DPO and the 72-hour breach rule.';
+  if(low.includes('anonymization')) return '<b>Pro Tip — Anonymization breaks the link to the person.</b> Pseudonymization does not: the key can reconnect the data, so the privacy status is different.';
+  if(low.includes('pseudonymization')) return '<b>Pro Tip — Ask “can I reconnect it?”</b> If a key can restore the identity, you are looking at pseudonymization rather than true anonymization.';
+  if(low.includes('supervised')) return '<b>Pro Tip — Supervised means the answer is known during training.</b> That single idea separates it from unsupervised learning.';
+  if(low.includes('unsupervised')) return '<b>Pro Tip — Unsupervised means discover structure without supplied labels.</b> Clustering and anomaly detection are the important examples in the course.';
+  if(low.includes('classification')) return '<b>Pro Tip — Classification outputs a class, not a continuous amount.</b> Spam/not spam is classification; a salary forecast is regression.';
+  if(low.includes('regression')) return '<b>Pro Tip — Regression predicts a number.</b> Look for a continuous outcome such as price, demand or revenue.';
+  if(low.includes('reinforcement')) return '<b>Pro Tip — Reinforcement learning learns through consequences.</b> The agent changes future behaviour based on rewards and penalties from its environment.';
+  if(low.includes('python')) return '<b>Pro Tip — Python is not only a statistics language.</b> The course emphasizes its general-purpose nature, readability and broad deployment capability.';
+  if(low.includes('r ')) return '<b>Pro Tip — In this course, R is strongly tied to statistics and visualization.</b> Python is positioned as the broader general-purpose choice.';
+  if(low.includes('jupyter')) return '<b>Pro Tip — Jupyter combines code and explanation.</b> That makes it especially useful when analysis needs to be both executed and communicated.';
+  if(low.includes('algorithm')) return '<b>Pro Tip — Algorithm = procedure.</b> When a question describes a defined sequence of steps for solving a recurring problem, that is the core concept.';
+  if(low.includes('gpu')) return '<b>Pro Tip — GPU strength comes from parallelism.</b> The important contrast is not “GPU is always faster”; it is “GPU is especially effective for workloads that can be split into many parallel operations”.';
+  if(low.includes('sql')) return '<b>Pro Tip — SQL is the language; the database is the system holding the data.</b> Keeping those two ideas separate makes relational-database questions much easier.';
+  return `<b>Pro Tip — Connect this point to its role.</b> Ask: <b>what is it, what does it do, and when would I use or recognize it?</b> That gives the definition a practical anchor instead of treating it as an isolated sentence.`;
+}
+
+function buildFlow(lesson,index){
+  const source=[lesson.teach,...(lesson.deep||[])].filter(Boolean);
+  const blocks=[];
+  const checkpointAt=Math.max(3,Math.ceil(source.length*0.55));
+
+  source.forEach((item,i)=>{
+    blocks.push({
+      type:'note',
+      html:`<div class="note-card">
+        <div class="note-label">Key learning point ${i+1}</div>
+        <div class="text-[1.02rem] md:text-[1.08rem] font-black text-white leading-relaxed">${highlightKeyPhrase(item)}</div>
+        <div class="note-explain">${noteExplanation(item,lesson)}</div>
+        <div class="note-example">${noteExample(item,lesson)}</div>
+      </div>`
+    });
+    if(i===1 || i===source.length-1){
+      blocks.push({type:'protip',html:buildProTipForNote(item,lesson,i)});
+    }
+    if(i===checkpointAt-1){
+      blocks.push({type:'quiz',question:lesson.q,opts:lesson.opts,answer:lesson.a,kind:'lesson'});
+    }
+  });
+
+  if(index>0 && index%3===0){
+    const mem=buildMemoryCheck(index);
+    if(mem) blocks.splice(Math.min(blocks.length-1,Math.floor(blocks.length*.78)),0,mem);
+  }
+  if(!blocks.some(b=>b.type==='quiz')) blocks.push({type:'quiz',question:lesson.q,opts:lesson.opts,answer:lesson.a,kind:'lesson'});
+  return blocks;
+}
+
+function renderJourney(){
+  const data=lessons();
+  const pct=data.length?Math.round((completed.length/data.length)*100):0;
+  document.getElementById('journey-title').innerText=
+    track==='foundation'?'Foundation Learning Journey':'Analyst Learning Journey';
+  document.getElementById('lesson-position').innerText=`Lesson ${current+1} of ${data.length}`;
+  document.getElementById('progress-text').innerText=`${completed.length} / ${data.length} lessons`;
+  document.getElementById('progress-percent').innerText=pct+'%';
+  document.getElementById('progress-bar').style.width=pct+'%';
+
+  renderLessonMap();
+  renderCurrentLesson();
+
+  if(completed.length===data.length){
+    document.getElementById('completion').classList.remove('hidden');
+    document.getElementById('completion-message').innerText=
+      `You completed every lesson in the ${track} journey. Every lesson remains open for review.`;
+  }else{
+    document.getElementById('completion').classList.add('hidden');
+  }
+}
+
+function renderLessonMap(){
+  const map=document.getElementById('lesson-map');
+  map.innerHTML=lessons().map((l,i)=>{
+    const classes=[i===current?'current':'',completed.includes(i)?'done':'',visited.has(i)?'visited':''].filter(Boolean).join(' ');
+    return `<button type="button" class="${classes}" onclick="goToLesson(${i})" title="${escapeAttr(l.title)}">${i+1}</button>`;
+  }).join('');
+  document.getElementById('current-lesson-status').innerText=
+    completed.includes(current)?'Completed • Review anytime':'Current lesson';
+}
+
+function renderCurrentLesson(){
+  const data=lessons();
+  const lesson=data[current];
+  if(!lesson) return;
+  const flow=buildFlow(lesson,current);
+  if(flowIndex<0) flowIndex=0;
+  if(flowIndex>=flow.length) flowIndex=flow.length-1;
+
+  const label=document.getElementById('lesson-review-label');
+  label.classList.toggle('hidden',!completed.includes(current) && visited.size<=1);
+  document.getElementById('lesson-section').innerText=lesson.section;
+  document.getElementById('lesson-title').innerText=lesson.title;
+
+  const unit=flow[flowIndex];
+  const pct=flow.length?Math.round(((flowIndex+1)/flow.length)*100):0;
+  document.getElementById('lesson-mini-bar').style.width=pct+'%';
+  document.getElementById('lesson-mini-text').innerText=`Step ${flowIndex+1} / ${flow.length}`;
+
+  const panel=document.getElementById('solo-flow');
+  panel.classList.remove('fade-in'); void panel.offsetWidth; panel.classList.add('fade-in');
+
+  if(unit.type==='note'){
+    panel.innerHTML=`<div class="text-[10px] uppercase tracking-widest font-black text-purple-400 mb-3">Learn</div>${unit.html}${renderFlowNavigation()}`;
+  } else if(unit.type==='protip'){
+    panel.innerHTML=`<div class="pro-tip fade-in"><div class="pro-tip-title"><i class="fa-solid fa-lightbulb mr-2"></i>Pro Tip • Topic Insight</div><div class="pro-tip-body text-[.95rem] leading-relaxed">${unit.html}</div></div>${renderFlowNavigation()}`;
+  } else if(unit.type==='quiz') renderQuizUnit(unit,panel);
+  else if(unit.kind==='memory') renderMemoryUnit(unit,panel);
+
+  updateFlowNavButtons();
+}
+
+function updateFlowNavButtons(){
+  const data=lessons();
+  const flow=buildFlow(data[current],current);
+  const canPrev=(flowIndex>0 || current>0);
+  const canNext=(flowIndex<flow.length-1 || current<data.length-1);
+  const prev=document.getElementById('prev-lesson-btn');
+  const next=document.getElementById('next-lesson-btn');
+  prev.disabled=!canPrev; prev.classList.toggle('opacity-40',!canPrev); prev.classList.toggle('cursor-not-allowed',!canPrev);
+  next.disabled=!canNext; next.classList.toggle('opacity-40',!canNext); next.classList.toggle('cursor-not-allowed',!canNext);
+  prev.innerHTML='<i class="fa-solid fa-arrow-left mr-2"></i> Previous';
+  next.innerHTML=(flowIndex<flow.length-1?'Next':'Next lesson')+' <i class="fa-solid fa-arrow-right ml-2"></i>';
+}
+
+function goPrevious(){
+  const data=lessons();
+  const flow=buildFlow(data[current],current);
+  if(flowIndex>0){ flowIndex--; lastQuizCorrect=false; renderCurrentLesson(); return; }
+  if(current>0){ current--; visited.add(current); const prevFlow=buildFlow(data[current],current); flowIndex=Math.max(0,prevFlow.length-1); lastQuizCorrect=false; renderJourney(); }
+}
+
+function goNext(){
+  const data=lessons();
+  const flow=buildFlow(data[current],current);
+  const unit=flow[flowIndex];
+  if(unit && unit.type==='quiz' && !lastQuizCorrect) return;
+  if(flowIndex<flow.length-1){ flowIndex++; lastQuizCorrect=false; renderCurrentLesson(); return; }
+  completeCurrentLesson();
+  if(current<data.length-1){ current++; visited.add(current); flowIndex=0; lastQuizCorrect=false; renderJourney(); }
+  else { renderJourney(); celebrateBig(); document.getElementById('completion').scrollIntoView({behavior:'smooth',block:'center'}); }
+}
+
+function renderFlowNavigation(){
+  const data=lessons();
+  const flow=buildFlow(data[current],current);
+  const atEnd=flowIndex>=flow.length-1;
+  const nextText=atEnd?(current<data.length-1?'Continue to next lesson':'Finish journey'):'Continue';
+  return `<div class="lesson-endcap flex justify-end"><button type="button" onclick="goNext()" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3.5 rounded-xl font-black">${nextText}<i class="fa-solid fa-arrow-right ml-2"></i></button></div>`;
+}
+
+function renderQuizUnit(unit,panel){
+  panel.innerHTML=`
+    <div class="solo-checkpoint fade-in">
+      <div class="text-[10px] uppercase tracking-widest font-black text-emerald-300 mb-2">Quick check</div>
+      <h5 class="text-xl md:text-2xl font-black text-white leading-relaxed">${escapeHtml(unit.question)}</h5>
+      <div id="flow-quiz-options" class="grid gap-3 mt-5">
+        ${unit.opts.map((o,j)=>`<button type="button" class="quiz-option w-full text-left px-4 py-4 rounded-xl bg-[#181338] border border-purple-900/80 text-slate-200 font-bold" onclick="answerFlowQuiz(${j})">
+          <span class="inline-flex w-8 h-8 rounded-lg bg-purple-950 border border-purple-800 items-center justify-center mr-2 text-xs">${String.fromCharCode(65+j)}</span>${escapeHtml(o)}
+        </button>`).join('')}
+      </div>
+      <div id="flow-feedback" class="hidden mt-4 rounded-xl p-4 text-sm font-black"></div>
+    </div>`;
+}
+
+function renderMemoryUnit(unit,panel){
+  panel.innerHTML=`
+    <div class="solo-memory fade-in">
+      <div class="text-[10px] uppercase tracking-widest font-black text-amber-300 mb-2">Memory check</div>
+      <p class="text-sm text-amber-100/80 mb-4">A question from an earlier topic appears here on purpose — this is spaced reinforcement, not a new section.</p>
+      <h5 class="text-xl md:text-2xl font-black text-white leading-relaxed">${escapeHtml(unit.q)}</h5>
+      <div id="flow-quiz-options" class="grid gap-3 mt-5">
+        ${unit.opts.map((o,j)=>`<button type="button" class="quiz-option w-full text-left px-4 py-4 rounded-xl bg-[#181338] border border-purple-900/80 text-slate-200 font-bold" onclick="answerMemoryQuiz(${j},${unit.a})">
+          <span class="inline-flex w-8 h-8 rounded-lg bg-purple-950 border border-purple-800 items-center justify-center mr-2 text-xs">${String.fromCharCode(65+j)}</span>${escapeHtml(o)}
+        </button>`).join('')}
+      </div>
+      <div id="flow-feedback" class="hidden mt-4 rounded-xl p-4 text-sm font-black"></div>
+    </div>`;
+}
+
+function handleFlowContinue(){
+  const flow=buildFlow(lessons()[current],current);
+  const unit=flow[flowIndex];
+
+  if(unit.type==='quiz'){
+    if(!lastQuizCorrect) return;
+    // lastQuizCorrect is consumed only for this checkpoint.
+    lastQuizCorrect=false;
+  }
+
+  if(flowIndex<flow.length-1){
+    flowIndex++;
+    renderCurrentLesson();
+    return;
+  }
+
+  completeCurrentLesson();
+
+  if(current<lessons().length-1){
+    current++;
+    flowIndex=0;
+    lastQuizCorrect=false;
+    visited.add(current);
+    renderJourney();
+    document.getElementById('solo-lesson-panel').scrollIntoView({behavior:'smooth',block:'start'});
+  }else{
+    renderJourney();
+    celebrateBig();
+    setTimeout(()=>document.getElementById('completion').scrollIntoView({behavior:'smooth',block:'center'}),100);
+  }
+}
+
+function answerFlowQuiz(selected){
+  const flow=buildFlow(lessons()[current],current);
+  const unit=flow[flowIndex];
+  if(!unit || unit.type!=='quiz') return;
+
+  const buttons=[...document.querySelectorAll('#flow-quiz-options .quiz-option')];
+  const feedback=document.getElementById('flow-feedback');
+
+  buttons.forEach(b=>b.disabled=true);
+
+  if(selected===unit.answer){
+    buttons[selected].classList.add('quiz-correct');
+    feedback.className='mt-4 rounded-xl p-4 text-sm font-black bg-emerald-950/60 text-emerald-200 border border-emerald-500/40';
+    feedback.innerHTML='<i class="fa-solid fa-circle-check mr-2 text-emerald-400"></i>Correct. Continue when you are ready.';
+    feedback.classList.remove('hidden');
+    lastQuizCorrect=true;
+
+    setTimeout(()=>{
+      const wrap=document.createElement('div');
+      wrap.className='mt-5 flex justify-end fade-in';
+      wrap.innerHTML='<button type="button" onclick="handleFlowContinue()" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3.5 rounded-xl font-black">Continue <i class="fa-solid fa-arrow-right ml-2"></i></button>';
+      panelAppend(wrap);
+    },120);
+
+    celebrateSmall();
+  }else{
+    buttons[selected].classList.add('quiz-wrong');
+    feedback.className='mt-4 rounded-xl p-4 text-sm font-black bg-rose-950/60 text-rose-200 border border-rose-500/40';
+    feedback.innerHTML='<i class="fa-solid fa-rotate-right mr-2 text-amber-300"></i>Not quite. Review what you just learned and try again.';
+    feedback.classList.remove('hidden');
+
+    setTimeout(()=>{
+      buttons.forEach(b=>{b.disabled=false;b.classList.remove('quiz-wrong','quiz-correct')});
+      feedback.classList.add('hidden');
+    },700);
+  }
+}
+
+function panelAppend(node){
+  const panel=document.getElementById('solo-flow');
+  if(panel) panel.querySelector('.solo-checkpoint,.solo-memory')?.appendChild(node);
+}
+
+function answerMemoryQuiz(selected,correct){
+  const buttons=[...document.querySelectorAll('#flow-quiz-options .quiz-option')];
+  const feedback=document.getElementById('flow-feedback');
+  buttons.forEach(b=>b.disabled=true);
+
+  if(selected===correct){
+    buttons[selected].classList.add('quiz-correct');
+    feedback.className='mt-4 rounded-xl p-4 text-sm font-black bg-emerald-950/60 text-emerald-200 border border-emerald-500/40';
+    feedback.innerHTML='<i class="fa-solid fa-brain mr-2 text-emerald-400"></i>Nice recall. Continue with the lesson.';
+    feedback.classList.remove('hidden');
+    celebrateSmall();
+    setTimeout(()=>handleFlowContinue(),450);
+  }else{
+    buttons[selected].classList.add('quiz-wrong');
+    feedback.className='mt-4 rounded-xl p-4 text-sm font-black bg-amber-950/60 text-amber-200 border border-amber-500/40';
+    feedback.innerHTML='<i class="fa-solid fa-lightbulb mr-2 text-amber-300"></i>Review the earlier idea and try again.';
+    feedback.classList.remove('hidden');
+    setTimeout(()=>{
+      buttons.forEach(b=>{b.disabled=false;b.classList.remove('quiz-wrong','quiz-correct')});
+      feedback.classList.add('hidden');
+    },700);
+  }
+}
+
+function goToLesson(i){
+  const data=lessons();
+  if(!Number.isInteger(i) || i<0 || i>=data.length) return;
+  current=i;
+  flowIndex=0;
+  lastQuizCorrect=false;
+  visited.add(i);
+  renderJourney();
+  setTimeout(()=>document.getElementById('solo-lesson-panel').scrollIntoView({behavior:'smooth',block:'start'}),30);
+}
+
+function goPreviousLesson(){ goPrevious(); }
+
+function goNextLesson(){ goNext(); }
+
+function formatInline(html){ return String(html||''); }
+
+function celebrateSmall(){
+  if(typeof confetti!=='function')return;
+  confetti({particleCount:30,spread:55,startVelocity:20,origin:{x:.5,y:.65},scalar:.7});
+}
+
+function celebrateBig(){
+  if(typeof confetti!=='function')return;
+  const end=Date.now()+1800;
+  const timer=setInterval(()=>{
+    if(Date.now()>end){clearInterval(timer);return;}
+    confetti({particleCount:45,spread:100,startVelocity:26,origin:{x:Math.random(),y:.6}});
+  },180);
+}
+
+function escapeAttr(str){
+  return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
+
+
+/* ============================================================
+   MASET CONTINUOUS STORYLINE ENGINE — V2
+   Major topics are chapters. Each chapter contains multiple
+   connected teaching steps and multiple checkpoints.
+   All chapters remain revisitable at any time.
+   ============================================================ */
+
+
+window.addEventListener('load',()=>{
+  if(!DATA || !Array.isArray(DATA.foundation) || !Array.isArray(DATA.analyst)){
+    document.body.innerHTML='<div style="padding:40px;font-family:sans-serif;color:white;background:#090514"><h1>Course data failed to load.</h1><p>Please reopen the HTML file.</p></div>';
+    return;
+  }
+});
+</script>
+
+<div id="study-tools-overlay" class="study-overlay" onclick="suiteBackdrop(event)">
+  <div class="study-panel" onclick="event.stopPropagation()">
+    <div class="study-panel-head">
+      <div>
+        <div class="text-[10px] uppercase tracking-widest text-purple-400 font-black">Additional Study Tools</div>
+        <h2 id="suite-title" class="text-xl md:text-2xl font-black text-white mt-1">Flashcards</h2>
+        <p id="suite-track-label" class="text-xs text-purple-300 mt-1 font-bold"></p>
+      </div>
+      <button class="study-close" onclick="suiteClose()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="study-subnav">
+      <button id="suite-nav-flashcards" onclick="suiteShow('flashcards')"><i class="fa-solid fa-layer-group mr-1"></i>Flashcards</button>
+      <button id="suite-nav-glossary" onclick="suiteShow('glossary')"><i class="fa-solid fa-spell-check mr-1"></i>Glossary</button>
+      <button id="suite-nav-exam" onclick="suiteShow('exam')"><i class="fa-solid fa-trophy mr-1"></i>Mock Exam</button>
+    </div>
+
+    <!-- FLASHCARDS -->
+    <section id="suite-flashcards" class="p-5 md:p-8">
+      <div class="flex flex-col lg:flex-row gap-4 justify-between mb-5">
+        <div>
+          <h3 class="text-2xl font-black text-white">High-Yield Flashcards</h3>
+          <p class="text-sm text-purple-300 mt-1">Short recall practice from your course material. Mark cards as <b>Need Practice</b> or <b>Mastered</b>.</p>
+        </div>
+        <div class="flex flex-wrap gap-2 items-center">
+          <span class="gamified-pill bg-purple-950/50 border border-purple-800 px-3 py-2 rounded-xl text-xs font-black text-purple-200">Track: <span id="suite-fc-track" class="text-white"></span></span>
+          <span class="bg-[#181338] border border-purple-800 px-3 py-2 rounded-xl text-xs font-black text-emerald-300">Mastered: <span id="suite-fc-mastered">0</span></span>
+        </div>
+      </div>
+      <div id="suite-fc-topics" class="flex flex-wrap gap-2 mb-5"></div>
+      <div class="fc-card" id="suite-fc-card">
+        <div>
+          <div class="w-14 h-14 rounded-2xl bg-purple-950 border border-purple-800 flex items-center justify-center mx-auto mb-4"><i class="fa-regular fa-lightbulb text-amber-300 text-2xl"></i></div>
+          <div id="suite-fc-question" class="text-xl md:text-2xl font-black text-white leading-relaxed max-w-3xl mx-auto">Choose a topic to begin.</div>
+          <div id="suite-fc-answer" class="hidden mt-5 text-sm md:text-base text-purple-100 leading-relaxed max-w-3xl mx-auto bg-black/25 border border-white/10 rounded-2xl p-5"></div>
+          <button id="suite-fc-reveal" class="mt-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-7 py-3 rounded-xl font-black" onclick="suiteFcReveal()">Reveal Answer</button>
+        </div>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-3 mt-5 max-w-3xl mx-auto">
+        <button onclick="suiteFcRate(false)" class="flex-1 px-4 py-3 rounded-xl bg-rose-950/70 border border-rose-700/50 text-rose-200 font-black"><i class="fa-solid fa-rotate-left mr-2"></i>Need Practice</button>
+        <button onclick="suiteFcRate(true)" class="flex-1 px-4 py-3 rounded-xl bg-emerald-950/70 border border-emerald-700/50 text-emerald-200 font-black"><i class="fa-solid fa-check mr-2"></i>Mastered</button>
+      </div>
+      <div class="mt-5 flex justify-between text-xs font-black text-purple-300 max-w-3xl mx-auto"><span id="suite-fc-progress">1 / 20</span><span id="suite-fc-review">Review queue: 0</span></div>
+    </section>
+
+    <!-- GLOSSARY -->
+    <section id="suite-glossary" class="hidden p-5 md:p-8">
+      <div class="mb-5">
+        <h3 class="text-2xl font-black text-white">Exam Glossary</h3>
+        <p class="text-sm text-purple-300 mt-1">Definitions from the course, with source-marked/high-priority terms clearly identified.</p>
+      </div>
+      <div class="relative mb-5">
+        <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-purple-400"></i>
+        <input id="suite-gloss-search" oninput="suiteRenderGlossary()" class="w-full pl-11 pr-4 py-3 rounded-xl bg-[#0a061a] border border-purple-800 text-white font-bold outline-none focus:border-pink-500" placeholder="Search term or definition...">
+      </div>
+      <div id="suite-glossary-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    </section>
+
+    <!-- MOCK EXAM -->
+    <section id="suite-exam" class="hidden p-5 md:p-8">
+      <div id="suite-exam-start">
+        <h3 class="text-2xl font-black text-white">PeopleCert-Style Practice Simulator</h3>
+        <p class="text-sm text-purple-300 mt-2 max-w-3xl">40 original multiple-choice questions built from your MASET course material and the current public PeopleCert certification scope. This is a practice simulator, not an official PeopleCert paper.</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 my-6">
+          <div class="bg-[#181338] border border-purple-800 rounded-xl p-4"><div class="text-[10px] uppercase tracking-widest text-purple-400 font-black">Track</div><div id="suite-exam-track" class="text-xl font-black text-white mt-1"></div></div>
+          <div class="bg-[#181338] border border-purple-800 rounded-xl p-4"><div class="text-[10px] uppercase tracking-widest text-purple-400 font-black">Format</div><div class="text-xl font-black text-white mt-1">40 MCQs</div></div>
+          <div class="bg-[#181338] border border-purple-800 rounded-xl p-4"><div class="text-[10px] uppercase tracking-widest text-purple-400 font-black">Time / Pass</div><div id="suite-exam-rules" class="text-xl font-black text-white mt-1"></div></div>
+        </div>
+        <div class="bg-amber-950/20 border border-amber-700/40 rounded-2xl p-4 text-sm text-amber-100 mb-5"><strong>Practice note:</strong> Questions are original and designed to resemble the public format and syllabus emphasis. They are not copied from past exam papers.</div>
+        <button onclick="suiteStartExam(false)" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-2xl font-black">Start Practice Exam <i class="fa-solid fa-arrow-right ml-2"></i></button>
+        <button id="suite-retake-wrong" onclick="suiteStartExam(true)" class="hidden ml-2 bg-amber-950/70 border border-amber-700/50 text-amber-200 px-6 py-4 rounded-2xl font-black">Retake Mistakes</button>
+      </div>
+
+      <div id="suite-exam-run" class="hidden">
+        <div class="flex items-center justify-between gap-3 mb-4">
+          <div><div class="text-[10px] uppercase tracking-widest text-purple-400 font-black">Question</div><div id="suite-exam-qnum" class="text-lg font-black text-white"></div></div>
+          <div class="text-right"><div class="text-[10px] uppercase tracking-widest text-purple-400 font-black">Time Remaining</div><div id="suite-exam-time" class="text-lg font-black text-amber-300"></div></div>
+        </div>
+        <div class="mock-progress mb-5"><div id="suite-exam-progress" style="width:2.5%"></div></div>
+        <div class="fun-card p-6 md:p-8">
+          <div id="suite-exam-topic" class="mock-meta mb-3"></div>
+          <h4 id="suite-exam-question" class="text-xl md:text-2xl font-black text-white leading-relaxed mb-6"></h4>
+          <div id="suite-exam-options" class="space-y-3"></div>
+          <div id="suite-exam-feedback" class="hidden mt-5 p-4 rounded-xl text-sm font-black"></div>
+          <div class="flex justify-end mt-6"><button id="suite-exam-next" onclick="suiteNextQuestion()" class="hidden bg-gradient-to-r from-purple-600 to-pink-600 text-white px-7 py-3 rounded-xl font-black">Next Question <i class="fa-solid fa-arrow-right ml-2"></i></button></div>
+        </div>
+      </div>
+
+      <div id="suite-exam-results" class="hidden">
+        <div class="mock-result">
+          <div id="suite-result-icon" class="text-7xl mb-4"></div>
+          <h3 class="text-3xl font-black text-white">Practice Exam Complete</h3>
+          <div class="text-purple-200 mt-3">Score: <span id="suite-result-score" class="text-4xl font-black text-pink-400"></span> / 40</div>
+          <div id="suite-result-message" class="mt-5 p-4 rounded-xl font-black border"></div>
+          <div class="flex flex-col sm:flex-row gap-3 justify-center mt-6"><button onclick="suiteStartExam(false)" class="bg-purple-950 text-purple-200 border border-purple-700 px-6 py-3 rounded-xl font-black">Restart Full Exam</button><button id="suite-review-wrong" onclick="suiteStartExam(true)" class="hidden bg-gradient-to-r from-amber-600 to-orange-600 text-white px-6 py-3 rounded-xl font-black">Retake Mistakes</button></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+
+<script>
+// ===== Added Study Tools: intentionally isolated from the existing MASET journey =====
+const SUITE_DATA = {"foundation":[{"q":"Define Data Science scope.","options":["Unified Modeling Language: a standardized visual modeling language for software engineering.","Techniques allowing human experts to understand how an AI model generated a specific decision.","An intermediate index holding zone where modified files are prepared before committing.","Combines scientific method, math/statistics, specialized programming, advanced analytics, AI, and storytelling to derive business insights."],"answer":3,"topic":"Topic 1: Data Science & Big Data","type":"knowledge"},{"q":"What is Data Mining?","options":["A measure of data condition based on accuracy, completeness, consistency, validity, and uniqueness.","Techniques allowing human experts to understand how an AI model generated a specific decision.","Translating complex mathematical and machine learning predictions into clear, actionable business strategies for stakeholders.","Exploratory data analysis identifying hidden patterns or trends primarily within structured data without requiring a preconceived hypothesis."],"answer":3,"topic":"Topic 1: Data Science & Big Data","type":"knowledge"},{"q":"State the 5 Vs of Big Data.","options":["The massive scale, sheer terabytes/petabytes of enterprise data generated continuously.","A high-level data-flow programming language and execution framework for processing large datasets on Hadoop.","Volume, Velocity, Variety, Veracity, and Value.","The coexistence of structured, semi-structured, and unstructured data formats (logs, audio, video, text)."],"answer":2,"topic":"Topic 1: Data Science & Big Data","type":"knowledge"},{"q":"Define a Data Swamp.","options":["An unmanaged Data Lake with broken ingestion pipelines, uncataloged assets, restricted access, and high maintenance overhead.","The principle that data collected must be adequate, relevant, and limited to what is strictly necessary.","An engineering approach embedding privacy and data minimization into system architecture from inception.","A cloud database utilizing machine learning to automate tuning, patching, and security without manual intervention."],"answer":0,"topic":"Topic 1: Data Science & Big Data","type":"knowledge"},{"q":"Contrast OLTP and OLAP.","options":["DELETE removes rows conditionally and logs each row; TRUNCATE quickly drops all table rows without individual row logging.","OLTP manages real-time operational transactions (row-oriented); OLAP executes complex aggregated historical queries (column-oriented via ETL).","A cloud database utilizing machine learning to automate tuning, patching, and security without manual intervention.","A foundational programming model and processing framework for distributed computing across large clusters."],"answer":1,"topic":"Topic 1: Data Science & Big Data","type":"knowledge"},{"q":"What is the primary architectural advantage of Big Data storage?","options":["Absence of Trust.","Linear horizontal scalability, schema flexibility, and limitless storage on distributed compute clusters.","Document anomalies transparently, consult domain experts, and remediate before modeling.","A unique column constraint guaranteeing every row in a table is uniquely identifiable with non-null values."],"answer":1,"topic":"Topic 1: Data Science & Big Data","type":"knowledge"},{"q":"What is Apache Hive?","options":["Data providing structural information about other data (e.g., schemas, creation timestamps, ownership).","To give control over personal data back to natural persons and unify data protection regulations across the EU.","A distributed data warehouse system built on Hadoop that enables SQL-like querying of big datasets.","The massive scale, sheer terabytes/petabytes of enterprise data generated continuously."],"answer":2,"topic":"Topic 1: Data Science & Big Data","type":"knowledge"},{"q":"What is Apache HBase?","options":["Compiled languages (C, C++) undergo a build step into machine code; Interpreted languages (Python, JS) execute line-by-line at runtime.","Structured Query Language, officially pronounced 'Sequel'.","A pointer referencing the currently checked-out commit or branch.","A distributed, scalable NoSQL key-value store modeled after Google BigTable."],"answer":3,"topic":"Topic 1: Data Science & Big Data","type":"knowledge"},{"q":"What is Apache Pig?","options":["A permanent snapshot recording changes to files, storing a unique hash and parent reference.","A distributed version control system tracking source code modifications and history across local repositories.","A high-level data-flow programming language and execution framework for processing large datasets on Hadoop.","Vendor lock-in, data security risks, network replication costs, and lack of data locality."],"answer":2,"topic":"Topic 1: Data Science & Big Data","type":"knowledge"},{"q":"Why is Veracity crucial in Big Data?","options":["A structured system defining authority, accountability, and control over organizational data assets.","A distributed version control system tracking source code modifications and history across local repositories.","It ensures data accuracy, quality, and trustworthiness, preventing the 'garbage-in, garbage-out' trap.","Protected corporate reputation, regulatory compliance, minimized legal risk, and higher data trust."],"answer":2,"topic":"Topic 1: Data Science & Big Data","type":"knowledge"},{"q":"Define Velocity in Big Data.","options":["Data providing structural information about other data (e.g., schemas, creation timestamps, ownership).","The high frequency and speed at which new operational transactions and live data streams are generated.","OLTP manages real-time operational transactions (row-oriented); OLAP executes complex aggregated historical queries (column-oriented via ETL).","System behavior, illustrating interactions between external actors and internal functional use cases."],"answer":1,"topic":"Topic 1: Data Science & Big Data","type":"knowledge"},{"q":"Define Volume in Big Data.","options":["Yes, 'Data' and 'data' represent distinct variables.","The massive scale, sheer terabytes/petabytes of enterprise data generated continuously.","Significant loss of analytical utility, zero auditability, and vulnerability to re-identification attacks.","A structured system defining authority, accountability, and control over organizational data assets."],"answer":1,"topic":"Topic 1: Data Science & Big Data","type":"knowledge"},{"q":"Define Variety in Big Data.","options":["Honesty, consistency, transparency, and strict protection of client confidentiality.","An operational role responsible for executing data policies, ensuring quality, and managing metadata.","The coexistence of structured, semi-structured, and unstructured data formats (logs, audio, video, text).","A departmental subset of an enterprise data warehouse focused on a single business line (e.g., Finance or Sales)."],"answer":2,"topic":"Topic 1: Data Science & Big Data","type":"knowledge"},{"q":"Define Value in Big Data.","options":["Validating that a model's methodology, theoretical foundation, and assumptions are robust and unbiased.","The strategic and financial return on investment derived from processing and acting upon big data.","A sorted data structure improving data retrieval speed at the expense of storage space and write performance.","The structured process of organizing database tables to minimize data redundancy and dependency anomalies."],"answer":1,"topic":"Topic 1: Data Science & Big Data","type":"knowledge"},{"q":"What was MapReduce (Google 2004)?","options":["A foundational programming model and processing framework for distributed computing across large clusters.","Protected corporate reputation, regulatory compliance, minimized legal risk, and higher data trust.","Clear documentation of data sources, storage locations, and prediction methodology.","The strategic and financial return on investment derived from processing and acting upon big data."],"answer":0,"topic":"Topic 1: Data Science & Big Data","type":"knowledge"},{"q":"What is GFS (Google File System)?","options":["Semi-structured JSON or XML documents with internal structural indexing.","Exploratory data analysis identifying hidden patterns or trends primarily within structured data without requiring a preconceived hypothesis.","Special categories of data (health, biometrics, genetics, racial origin, political opinions).","A scalable distributed file system designed for data-intensive distributed applications."],"answer":3,"topic":"Topic 1: Data Science & Big Data","type":"knowledge"},{"q":"Name the 6 stages of the Data Science Lifecycle.","options":["A discipline ensuring uniformity, accuracy, and accountability of an enterprise's core shared business entities.","1. Discovery, 2. Data Preparation, 3. Plan Model, 4. Build Model, 5. Communicate Results, 6. Measure Effectiveness.","A cloud-hosted Jupyter environment providing free GPU/TPU accelerator hardware for machine learning.","An operational role responsible for executing data policies, ensuring quality, and managing metadata."],"answer":1,"topic":"Topic 1: Data Science & Big Data","type":"knowledge"},{"q":"Is the Data Science Lifecycle strictly linear?","options":["DELETE removes rows conditionally and logs each row; TRUNCATE quickly drops all table rows without individual row logging.","No, it is iterative; practitioners frequently move backward or forward based on newly discovered data insights.","Special categories of data (health, biometrics, genetics, racial origin, political opinions).","Unified Modeling Language: a standardized visual modeling language for software engineering."],"answer":1,"topic":"Topic 1: Data Science & Big Data","type":"knowledge"},{"q":"What is the role of storytelling in Data Science?","options":["A scalable distributed file system designed for data-intensive distributed applications.","Translating complex mathematical and machine learning predictions into clear, actionable business strategies for stakeholders.","1. Key/Value Stores, 2. Document Stores, 3. Graph Databases, 4. Wide Column Stores.","Honesty, consistency, transparency, and strict protection of client confidentiality."],"answer":1,"topic":"Topic 1: Data Science & Big Data","type":"knowledge"},{"q":"What distinguishes Data Engineering from Data Science?","options":["Fraud, criminal negligence, or knowingly communicating false realities to stakeholders.","Special categories of data (health, biometrics, genetics, racial origin, political opinions).","Linear horizontal scalability, schema flexibility, and limitless storage on distributed compute clusters.","Data Engineering builds pipelines, infrastructure, and warehousing; Data Science builds predictive models and analytical algorithms."],"answer":3,"topic":"Topic 1: Data Science & Big Data","type":"knowledge"},{"q":"What does SQL stand for?","options":["Validating that a model's methodology, theoretical foundation, and assumptions are robust and unbiased.","Structured Query Language, officially pronounced 'Sequel'.","To deliver ethical, evidence-based insights that drive sustainable organizational value.","To catch bugs, enforce standards, and eliminate single-point-of-failure dependencies."],"answer":1,"topic":"Topic 2: Databases, SQL & NoSQL","type":"knowledge"},{"q":"When was SQL standardized?","options":["Standardized by ANSI in 1986 and ISO in 1987.","Relational Database Management System storing data in structured tables with rows, columns, and foreign key relations.","Unified Modeling Language: a standardized visual modeling language for software engineering.","To detect data drift, concept drift, and performance degradation in production."],"answer":0,"topic":"Topic 2: Databases, SQL & NoSQL","type":"knowledge"},{"q":"Define an RDBMS.","options":["No, it is iterative; practitioners frequently move backward or forward based on newly discovered data insights.","A column or set of columns in a table referencing the primary key of another table to maintain relational integrity.","Relational Database Management System storing data in structured tables with rows, columns, and foreign key relations.","An unmanaged Data Lake with broken ingestion pipelines, uncataloged assets, restricted access, and high maintenance overhead."],"answer":2,"topic":"Topic 2: Databases, SQL & NoSQL","type":"knowledge"},{"q":"What were early database limitations?","options":["Hierarchical and network databases were rigid and lacked flexible ad-hoc querying capabilities.","Volume, Velocity, Variety, Veracity, and Value.","A sorted data structure improving data retrieval speed at the expense of storage space and write performance.","The high frequency and speed at which new operational transactions and live data streams are generated."],"answer":0,"topic":"Topic 2: Databases, SQL & NoSQL","type":"knowledge"},{"q":"List the 4 NoSQL database categories.","options":["The right of data subjects to request permanent erasure of personal data when no longer necessary.","An intermediate index holding zone where modified files are prepared before committing.","1. Key/Value Stores, 2. Document Stores, 3. Graph Databases, 4. Wide Column Stores.","A structured project management methodology focusing on organization, control, and stages."],"answer":2,"topic":"Topic 2: Databases, SQL & NoSQL","type":"knowledge"},{"q":"What is a Graph Database optimized for?","options":["Representing complex network relationships and connections using nodes and arcs (e.g., fraud detection).","To deliver ethical, evidence-based insights that drive sustainable organizational value.","Exploratory data analysis identifying hidden patterns or trends primarily within structured data without requiring a preconceived hypothesis.","A permanent snapshot recording changes to files, storing a unique hash and parent reference."],"answer":0,"topic":"Topic 2: Databases, SQL & NoSQL","type":"knowledge"},{"q":"What is a Key/Value Store optimized for?","options":["Representing complex network relationships and connections using nodes and arcs (e.g., fraud detection).","Maximum write performance and simple dictionary lookups.","Honesty, consistency, transparency, and strict protection of client confidentiality.","Legal safeguards protecting employees reporting corporate fraud or ethical violations."],"answer":1,"topic":"Topic 2: Databases, SQL & NoSQL","type":"knowledge"},{"q":"What do Document Stores manage?","options":["Clear documentation of data sources, storage locations, and prediction methodology.","Semi-structured JSON or XML documents with internal structural indexing.","Inattention to Results (prioritizing ego and status over team goals).","A discipline ensuring uniformity, accuracy, and accountability of an enterprise's core shared business entities."],"answer":1,"topic":"Topic 2: Databases, SQL & NoSQL","type":"knowledge"},{"q":"What is a Wide Column Store?","options":["1. Discovery, 2. Data Preparation, 3. Plan Model, 4. Build Model, 5. Communicate Results, 6. Measure Effectiveness.","Legal safeguards protecting employees reporting corporate fraud or ethical violations.","A dynamic column-oriented database optimized for massive analytical read scalability (e.g., Cassandra).","A foundational programming model and processing framework for distributed computing across large clusters."],"answer":2,"topic":"Topic 2: Databases, SQL & NoSQL","type":"knowledge"},{"q":"What are the core benefits of Cloud infrastructure?","options":["Integrated Development Environment providing comprehensive coding, debugging, and version control tools.","An mandated enterprise role advising on GDPR compliance and monitoring data protection strategies.","Elastic scalability, reduced maintenance overhead, managed reliability, and agile deployment.","It ensures data accuracy, quality, and trustworthiness, preventing the 'garbage-in, garbage-out' trap."],"answer":2,"topic":"Topic 2: Databases, SQL & NoSQL","type":"knowledge"},{"q":"What are cloud migration risks?","options":["An engineering approach embedding privacy and data minimization into system architecture from inception.","Protected corporate reputation, regulatory compliance, minimized legal risk, and higher data trust.","A sorted data structure improving data retrieval speed at the expense of storage space and write performance.","Vendor lock-in, data security risks, network replication costs, and lack of data locality."],"answer":3,"topic":"Topic 2: Databases, SQL & NoSQL","type":"knowledge"},{"q":"What is an Autonomous Database?","options":["Exploratory data analysis identifying hidden patterns or trends primarily within structured data without requiring a preconceived hypothesis.","An operational role responsible for executing data policies, ensuring quality, and managing metadata.","A cloud database utilizing machine learning to automate tuning, patching, and security without manual intervention.","A foundational programming model and processing framework for distributed computing across large clusters."],"answer":2,"topic":"Topic 2: Databases, SQL & NoSQL","type":"knowledge"},{"q":"A retailer receives millions of transactions, social-media posts and sensor records in different formats every day. Which Big Data characteristic most directly describes the diversity of those formats?","options":["Volume","Velocity","Variety","Value"],"answer":2,"topic":"Big Data","type":"scenario"},{"q":"A company stores raw data in a cloud data lake, but ingestion is broken, metadata is missing and users struggle to access the data. What has the lake effectively become?","options":["Data Warehouse","Data Swamp","OLTP system","RDBMS"],"answer":1,"topic":"Big Data","type":"scenario"},{"q":"A system records individual sales transactions immediately as customers purchase items. Which environment best fits this workload?","options":["OLAP","OLTP","Data Lake","Data Mart"],"answer":1,"topic":"Databases","type":"scenario"},{"q":"A business wants to analyze aggregated historical sales across many years. Which environment is most appropriate?","options":["OLTP","OLAP","Key/Value store","Git repository"],"answer":1,"topic":"Databases","type":"scenario"},{"q":"An analyst wants to discover hidden patterns in a large structured dataset without starting with a preconceived hypothesis. Which activity best fits?","options":["Data Mining / EDA","Data entry","Data warehousing","Data masking"],"answer":0,"topic":"Analytics","type":"scenario"},{"q":"A manager asks, \"What happened to sales last quarter?\" Which type of analytics is being requested?","options":["Descriptive","Diagnostic","Predictive","Prescriptive"],"answer":0,"topic":"Analytics","type":"scenario"},{"q":"A manager asks, \"Why did sales fall last quarter?\" Which type of analytics is most appropriate?","options":["Descriptive","Diagnostic","Predictive","Prescriptive"],"answer":1,"topic":"Analytics","type":"scenario"},{"q":"A manager asks, \"What is likely to happen to demand next month?\" Which type of analytics best answers the question?","options":["Descriptive","Diagnostic","Predictive","Prescriptive"],"answer":2,"topic":"Analytics","type":"scenario"},{"q":"A manager asks, \"What action should we take to achieve the target?\" Which type of analytics best answers the question?","options":["Descriptive","Diagnostic","Predictive","Prescriptive"],"answer":3,"topic":"Analytics","type":"scenario"},{"q":"A team is checking whether a business objective is specific, measurable, achievable, realistic and time-related. Which framework are they using?","options":["SMART","OLAP","ACID","CRISP"],"answer":0,"topic":"Business objectives","type":"scenario"}],"analyst":[{"q":"List the 4 types of Business Analytics.","options":["Interpretability is how easily model mechanics are understood; explainability is providing reasons for specific predictions.","Optimizing external configuration settings (like learning rate or K) for an ML model.","The expected reduction in entropy achieved by splitting data on a feature.","Descriptive, Diagnostic, Predictive, and Prescriptive."],"answer":3,"topic":"Topic 1: Business Analytics & CRISP-DM","type":"knowledge"},{"q":"What does Descriptive Analytics examine?","options":["The mean is pulled above the median (Median < Mean).","Extract, Transform, Load: copying and cleaning data from sources into a target warehouse.","Interpretability is how easily model mechanics are understood; explainability is providing reasons for specific predictions.","What happened and what is happening right now (historical and current state)."],"answer":3,"topic":"Topic 1: Business Analytics & CRISP-DM","type":"knowledge"},{"q":"What does Diagnostic Analytics investigate?","options":["A measure of impurity or uncertainty in a dataset.","Extracting facial geometry for identity verification.","Why did it happen? Root-cause analysis of past anomalies.","Reward or penalty feedback given to an RL agent based on actions taken."],"answer":2,"topic":"Topic 1: Business Analytics & CRISP-DM","type":"knowledge"},{"q":"What is Predictive Analytics?","options":["Forecasting what is likely to happen in the future using statistical modeling and machine learning.","Principal Component Analysis: an unsupervised dimensionality reduction technique generating orthogonal components.","Splitting raw text strings into individual words or sub-word tokens.","Classifying text emotional tone as positive, negative, or neutral."],"answer":0,"topic":"Topic 1: Business Analytics & CRISP-DM","type":"knowledge"},{"q":"What does Prescriptive Analytics provide?","options":["Because 1:1 tables should generally be merged into a single table.","Autoregressive Integrated Moving Average.","Automated optimization rules and actionable recommendations.","A measure of impurity or uncertainty in a dataset."],"answer":2,"topic":"Topic 1: Business Analytics & CRISP-DM","type":"knowledge"},{"q":"List the 6 phases of CRISP-DM.","options":["1. Business Understanding, 2. Data Understanding, 3. Data Preparation, 4. Modelling, 5. Evaluation, 6. Deployment.","Natural Language Processing: studying machine comprehension and generation of human language.","A regression metric squaring errors to heavily penalize large outliers.","Artificial Neural Network: computing system with interconnected artificial neurons."],"answer":0,"topic":"Topic 1: Business Analytics & CRISP-DM","type":"knowledge"},{"q":"Is CRISP-DM strictly linear?","options":["Euclidean, Manhattan, or Cosine distance.","Extract, Transform, Load: copying and cleaning data from sources into a target warehouse.","No, it is highly iterative; practitioners loop back as new data insights emerge.","A distribution with a flat top and thin, light tails."],"answer":2,"topic":"Topic 1: Business Analytics & CRISP-DM","type":"knowledge"},{"q":"What is the primary role of BI tools?","options":["Automated optimization rules and actionable recommendations.","To bridge the gap between raw data and non-technical executive decision-making.","Numerical data with ordered values, equal intervals, and a true absolute zero point.","Extracting facial geometry for identity verification."],"answer":1,"topic":"Topic 1: Business Analytics & CRISP-DM","type":"knowledge"},{"q":"Define ETL.","options":["Reward or penalty feedback given to an RL agent based on actions taken.","An unsupervised centroid-based clustering algorithm grouping data into K distinct clusters.","Combining multiple models (e.g., Random Forest) to improve accuracy and stability.","Extract, Transform, Load: copying and cleaning data from sources into a target warehouse."],"answer":3,"topic":"Topic 1: Business Analytics & CRISP-DM","type":"knowledge"},{"q":"Where can ETL transformations occur?","options":["Machine translation, sentiment analysis, text prediction, and chatbots.","A measure of the asymmetry of a probability distribution around its mean.","What happened and what is happening right now (historical and current state).","In the source, during extraction, before loading, or during data modeling."],"answer":3,"topic":"Topic 1: Business Analytics & CRISP-DM","type":"knowledge"},{"q":"What is Query Folding in Power BI?","options":["Non-parametric monotonic correlation based on ranked values.","Optical Character Recognition: converting scanned text images into machine-readable text.","Optimizing external configuration settings (like learning rate or K) for an ML model.","The ability of Power Query to push transformation steps back to the source database engine."],"answer":3,"topic":"Topic 1: Business Analytics & CRISP-DM","type":"knowledge"},{"q":"Define a Star Schema.","options":["Seasonal and Trend decomposition using Loess, separating data into Trend, Seasonal, and Remainder.","Principal Component Analysis: an unsupervised dimensionality reduction technique generating orthogonal components.","A database schema consisting of central Fact tables linked to surrounding Dimension tables.","Forecasting what is likely to happen in the future using statistical modeling and machine learning."],"answer":2,"topic":"Topic 1: Business Analytics & CRISP-DM","type":"knowledge"},{"q":"What is Fact Table Granularity?","options":["An unsupervised centroid-based clustering algorithm grouping data into K distinct clusters.","Categorical data with a natural sequential order, but no quantifiable distance between values.","The level of detail represented by each row in a fact table.","To communicate information clearly, explore patterns, explain findings, and persuade stakeholders."],"answer":2,"topic":"Topic 1: Business Analytics & CRISP-DM","type":"knowledge"},{"q":"What is the most common table cardinality?","options":["Seasonal and Trend decomposition using Loess, separating data into Trend, Seasonal, and Remainder.","Many-to-one (*:1) or One-to-many.","Interpretability is how easily model mechanics are understood; explainability is providing reasons for specific predictions.","Machine translation, sentiment analysis, text prediction, and chatbots."],"answer":1,"topic":"Topic 1: Business Analytics & CRISP-DM","type":"knowledge"},{"q":"Why is One-to-One cardinality discouraged?","options":["Linear correlation between two continuous variables ranging from -1 to +1.","An ML paradigm where agents learn optimal actions via trial-and-error and delayed rewards.","Because 1:1 tables should generally be merged into a single table.","Descriptive, Diagnostic, Predictive, and Prescriptive."],"answer":2,"topic":"Topic 1: Business Analytics & CRISP-DM","type":"knowledge"},{"q":"What is Many-to-Many cardinality?","options":["A relationship where neither table has unique keys; discouraged due to ambiguity.","Many-to-one (*:1) or One-to-many.","Interpretability is how easily model mechanics are understood; explainability is providing reasons for specific predictions.","Two parameters: Mean (μ) and Standard Deviation (σ)."],"answer":0,"topic":"Topic 1: Business Analytics & CRISP-DM","type":"knowledge"},{"q":"What is a DAX Calculated Column?","options":["Principal Component Analysis: an unsupervised dimensionality reduction technique generating orthogonal components.","Evaluated row-by-row, materialized in memory, and consumes file storage space.","TP / (TP + FN) — the proportion of actual positives correctly identified.","Identifying rare observations that deviate significantly from majority data norms."],"answer":1,"topic":"Topic 1: Business Analytics & CRISP-DM","type":"knowledge"},{"q":"What is a DAX Measure?","options":["Linear regression with L1 regularization capable of driving coefficients to zero for feature selection.","The expected reduction in entropy achieved by splitting data on a feature.","Evaluated on-demand using current filter context, consuming CPU resources with no physical storage.","Natural Language Processing: studying machine comprehension and generation of human language."],"answer":2,"topic":"Topic 1: Business Analytics & CRISP-DM","type":"knowledge"},{"q":"What is Trellising (Small Multiples)?","options":["The harmonic mean of Precision and Recall.","Splitting a visualization into multiple side-by-side charts partitioned by a dimension.","Area Under the ROC curve measuring a classifier's discrimination capacity.","The practice unifying ML development (Dev) and operations (Ops) for production environments."],"answer":1,"topic":"Topic 1: Business Analytics & CRISP-DM","type":"knowledge"},{"q":"What is the primary goal of data visualization?","options":["A supervised task predicting continuous numerical values.","Automated optimization rules and actionable recommendations.","A normal distribution with a standard bell curve kurtosis.","To communicate information clearly, explore patterns, explain findings, and persuade stakeholders."],"answer":3,"topic":"Topic 1: Business Analytics & CRISP-DM","type":"knowledge"},{"q":"Define Nominal scale.","options":["Because 1:1 tables should generally be merged into a single table.","Categorical data with distinct named groups and no quantitative ranking.","Forecasting what is likely to happen in the future using statistical modeling and machine learning.","An AI subfield enabling computers to extract semantic understanding from images and video."],"answer":1,"topic":"Topic 2: Statistics & Distributions","type":"knowledge"},{"q":"Define Ordinal scale.","options":["Categorical data with a natural sequential order, but no quantifiable distance between values.","An ML paradigm where agents learn optimal actions via trial-and-error and delayed rewards.","Numerical data with ordered values, equal intervals, and a true absolute zero point.","A subset of ML based on multi-layered neural networks capable of automatic feature extraction."],"answer":0,"topic":"Topic 2: Statistics & Distributions","type":"knowledge"},{"q":"Define Interval scale.","options":["Extracting facial geometry for identity verification.","Evaluated row-by-row, materialized in memory, and consumes file storage space.","Numerical data with ordered intervals and equal units, but NO true absolute zero.","A flowchart-like structure where internal nodes test features and leaves make decisions."],"answer":2,"topic":"Topic 2: Statistics & Distributions","type":"knowledge"},{"q":"Define Ratio scale.","options":["When a time series has constant mean, variance, and autocorrelation over time.","Machine translation, sentiment analysis, text prediction, and chatbots.","Numerical data with ordered values, equal intervals, and a true absolute zero point.","When an ML model memorizes training noise and fails to generalize to unseen test data."],"answer":2,"topic":"Topic 2: Statistics & Distributions","type":"knowledge"},{"q":"Define Skewness.","options":["Why did it happen? Root-cause analysis of past anomalies.","A measure of the asymmetry of a probability distribution around its mean.","TP / (TP + FN) — the proportion of actual positives correctly identified.","Natural Language Processing: studying machine comprehension and generation of human language."],"answer":1,"topic":"Topic 2: Statistics & Distributions","type":"knowledge"},{"q":"In a Negative Skew, what is the mean vs median?","options":["To bridge the gap between raw data and non-technical executive decision-making.","The mean is pulled below the median (Median > Mean).","1. Business Understanding, 2. Data Understanding, 3. Data Preparation, 4. Modelling, 5. Evaluation, 6. Deployment.","A measure of the 'tailedness' or peakedness of a distribution relative to a normal curve."],"answer":1,"topic":"Topic 2: Statistics & Distributions","type":"knowledge"},{"q":"In a Positive Skew, what is the mean vs median?","options":["The mean is pulled above the median (Median < Mean).","Forecasting what is likely to happen in the future using statistical modeling and machine learning.","Facial recognition, augmented reality, autonomous vehicles, and medical imaging.","The difference between the upper and lower quartiles (Q3 - Q1)."],"answer":0,"topic":"Topic 2: Statistics & Distributions","type":"knowledge"},{"q":"Define Kurtosis.","options":["Why did it happen? Root-cause analysis of past anomalies.","Because 1:1 tables should generally be merged into a single table.","A measure of the 'tailedness' or peakedness of a distribution relative to a normal curve.","The ability of Power Query to push transformation steps back to the source database engine."],"answer":2,"topic":"Topic 2: Statistics & Distributions","type":"knowledge"},{"q":"What is a Mesokurtic distribution?","options":["The harmonic mean of Precision and Recall.","An AI subfield enabling computers to extract semantic understanding from images and video.","A normal distribution with a standard bell curve kurtosis.","Extracting facial geometry for identity verification."],"answer":2,"topic":"Topic 2: Statistics & Distributions","type":"knowledge"},{"q":"What is a Leptokurtic distribution?","options":["A distribution with heavy fat tails and a sharp, high peak.","Predicting future values based on previously observed time-ordered data points.","Training a model using labeled input/output pairs to predict future outcomes.","Optical Character Recognition: converting scanned text images into machine-readable text."],"answer":0,"topic":"Topic 2: Statistics & Distributions","type":"knowledge"},{"q":"What is a Platykurtic distribution?","options":["The practice unifying ML development (Dev) and operations (Ops) for production environments.","A distribution with a flat top and thin, light tails.","The expected reduction in entropy achieved by splitting data on a feature.","To bridge the gap between raw data and non-technical executive decision-making."],"answer":1,"topic":"Topic 2: Statistics & Distributions","type":"knowledge"},{"q":"What does Pearson Correlation measure?","options":["A crude heuristic process chopping off word suffixes to reach root stems.","Predicting future values based on previously observed time-ordered data points.","Locating specific objects within images using bounding boxes alongside classification.","Linear correlation between two continuous variables ranging from -1 to +1."],"answer":3,"topic":"Topic 2: Statistics & Distributions","type":"knowledge"},{"q":"A business analyst is asked to define the problem, understand stakeholders and set measurable goals before touching the model. Which CRISP-DM phase comes first?","options":["Business Understanding","Data Preparation","Evaluation","Deployment"],"answer":0,"topic":"CRISP-DM","type":"scenario"},{"q":"A Power BI transformation can be translated back to the source database so the source performs the work. What concept is this?","options":["Query Folding","Data Masking","Cardinality","Pseudonymization"],"answer":0,"topic":"Power BI","type":"scenario"},{"q":"A report needs a central sales table connected to product, customer and date tables. Which design is being described?","options":["Star Schema","Graph Database","Wide Column Store","Hierarchical Database"],"answer":0,"topic":"Data Modeling","type":"scenario"},{"q":"A Power BI calculation must respond dynamically to the current slicers and filter context rather than being stored row by row. What should be used?","options":["Measure","Calculated Column","Primary Key","Fact Table"],"answer":0,"topic":"DAX","type":"scenario"},{"q":"A forecasting team wants to estimate trend, seasonal behaviour and remainder components from a time series. Which method from the course directly provides these components?","options":["STL","K-Means","PCA","RACI"],"answer":0,"topic":"Time Series","type":"scenario"},{"q":"A model is trained using historical data and then evaluated on observations it never saw during fitting. Which dataset provides that final generalization check?","options":["Training data","Validation data","Test data","Source data"],"answer":2,"topic":"Model Evaluation","type":"scenario"},{"q":"A fraud model should catch as many actual fraud cases as possible, even if some legitimate transactions are flagged. Which classification metric is especially relevant?","options":["Recall","Precision","Mean","R-squared"],"answer":0,"topic":"Metrics","type":"scenario"},{"q":"A clustering algorithm must identify irregularly shaped clusters and noise without choosing K beforehand. Which algorithm best fits?","options":["DBSCAN","K-Means","Linear Regression","PCA"],"answer":0,"topic":"Machine Learning","type":"scenario"},{"q":"A chart is intended to show how sales change month by month over two years. Which chart is the most appropriate?","options":["Line chart","Pie chart","Histogram","Tree map"],"answer":0,"topic":"Visualization","type":"scenario"},{"q":"A dataset contains categories such as Bronze, Silver and Gold where order matters but the distance between levels is not measurable. Which measurement scale is this?","options":["Nominal","Ordinal","Interval","Ratio"],"answer":1,"topic":"Statistics","type":"scenario"}],"foundationGlossary":[{"term":"Big Data (5 Vs)","def":"Volume, Velocity, Variety, Veracity, and Value. Scalable, flexible, stored in Data Lakes."},{"term":"DAMA-DMBOK","def":"Data Management Body of Knowledge. Includes 11 knowledge areas with Data Governance at the heart."},{"term":"Data Governance","def":"A system defining who has authority and control over data assets and how they may be used."},{"term":"Data Mining (EDA)","def":"Exploratory data analysis focusing on uncovering hidden patterns mostly in structured data without prior hypotheses."},{"term":"Data Swamp","def":"An unmanaged data lake characterized by broken ingestion, uncataloged assets, and high operations overhead."},{"term":"Data Stewardship","def":"An operational role responsible for executing data policies, data quality, and metadata management."},{"term":"Differential Privacy","def":"A mathematical framework adding controlled noise to query responses to protect individual identities."},{"term":"GDPR","def":"General Data Protection Regulation. Fines up to €20M or 4% global turnover. Gives control over PII back to individuals."},{"term":"Git","def":"A distributed version-control system tracking source code modifications via commits, snapshots, and branches."},{"term":"Master Data Management (MDM)","def":"A discipline ensuring uniformity, accuracy, and accountability of enterprise core shared business entities."},{"term":"NoSQL","def":"Not Only SQL databases designed for unstructured/semi-structured data. Categories: Key/Value, Document, Graph, Wide Column."},{"term":"OLAP","def":"Online Analytical Processing. Complex queries analyzing historical aggregated data via ETL."},{"term":"OLTP","def":"Online Transaction Processing. Captures, stores, and processes operational transactions in real time."},{"term":"Pseudonymization","def":"Replacing personal identifiers with keys; remains regulated personal data under GDPR."},{"term":"SQL","def":"Structured Query Language. Standardized by ANSI and ISO for relational database interaction."}],"analystGlossary":[{"term":"CRISP-DM","def":"Cross-Industry Standard Process for Data Mining: Business Understanding, Data Understanding, Data Preparation, Modelling, Evaluation, Deployment."},{"term":"DAX","def":"Data Analysis Expressions used in Power BI for calculated columns (materialized row-wise) and measures (on-demand aggregation)."},{"term":"DBSCAN","def":"Density-based spatial clustering of applications with noise. Discovers clusters of arbitrary shape without pre-specifying K."},{"term":"Decision Tree","def":"A flowchart-like supervised ML model splitting data based on Information Gain derived from Entropy."},{"term":"Information Gain","def":"The expected reduction in entropy achieved by partitioning data on a specific feature."},{"term":"K-Means Clustering","def":"An unsupervised centroid-based clustering algorithm partitioning data into K distinct groups using distance metrics."},{"term":"Kurtosis","def":"A statistical measure of tailedness relative to a normal distribution (Mesokurtic, Leptokurtic, Platykurtic)."},{"term":"PCA","def":"Principal Component Analysis: An unsupervised dimensionality reduction technique generating orthogonal feature components."},{"term":"Precision","def":"TP / (TP + FP) — measures the accuracy of positive predictions in a classification confusion matrix."},{"term":"Recall (Sensitivity)","def":"TP / (TP + FN) — measures the coverage and detection rate of actual positive instances."},{"term":"Skewness","def":"A measure of distribution asymmetry. Negative skew pulls the mean below the median; positive skew pulls the mean above."},{"term":"Star Schema","def":"A dimensional modeling structure linking a central Fact table to surrounding Dimension tables via foreign keys."},{"term":"STL Decomposition","def":"Seasonal and Trend decomposition using Loess, separating time series into Trend, Seasonal, and Remainder."},{"term":"Trellising (Small Multiples)","def":"Splitting a visualization into multiple side-by-side charts partitioned by a specific categorical dimension."}],"foundationTopics":[{"id":1,"name":"Topic 1: Data Science & Big Data","cards":[{"q":"Define Data Science scope.","a":"Combines scientific method, math/statistics, specialized programming, advanced analytics, AI, and storytelling to derive business insights."},{"q":"What is Data Mining?","a":"Exploratory data analysis identifying hidden patterns or trends primarily within structured data without requiring a preconceived hypothesis."},{"q":"State the 5 Vs of Big Data.","a":"Volume, Velocity, Variety, Veracity, and Value."},{"q":"Define a Data Swamp.","a":"An unmanaged Data Lake with broken ingestion pipelines, uncataloged assets, restricted access, and high maintenance overhead."},{"q":"Contrast OLTP and OLAP.","a":"OLTP manages real-time operational transactions (row-oriented); OLAP executes complex aggregated historical queries (column-oriented via ETL)."},{"q":"What is the primary architectural advantage of Big Data storage?","a":"Linear horizontal scalability, schema flexibility, and limitless storage on distributed compute clusters."},{"q":"What is Apache Hive?","a":"A distributed data warehouse system built on Hadoop that enables SQL-like querying of big datasets."},{"q":"What is Apache HBase?","a":"A distributed, scalable NoSQL key-value store modeled after Google BigTable."},{"q":"What is Apache Pig?","a":"A high-level data-flow programming language and execution framework for processing large datasets on Hadoop."},{"q":"Why is Veracity crucial in Big Data?","a":"It ensures data accuracy, quality, and trustworthiness, preventing the 'garbage-in, garbage-out' trap."},{"q":"Define Velocity in Big Data.","a":"The high frequency and speed at which new operational transactions and live data streams are generated."},{"q":"Define Volume in Big Data.","a":"The massive scale, sheer terabytes/petabytes of enterprise data generated continuously."},{"q":"Define Variety in Big Data.","a":"The coexistence of structured, semi-structured, and unstructured data formats (logs, audio, video, text)."},{"q":"Define Value in Big Data.","a":"The strategic and financial return on investment derived from processing and acting upon big data."},{"q":"What was MapReduce (Google 2004)?","a":"A foundational programming model and processing framework for distributed computing across large clusters."},{"q":"What is GFS (Google File System)?","a":"A scalable distributed file system designed for data-intensive distributed applications."},{"q":"Name the 6 stages of the Data Science Lifecycle.","a":"1. Discovery, 2. Data Preparation, 3. Plan Model, 4. Build Model, 5. Communicate Results, 6. Measure Effectiveness."},{"q":"Is the Data Science Lifecycle strictly linear?","a":"No, it is iterative; practitioners frequently move backward or forward based on newly discovered data insights."},{"q":"What is the role of storytelling in Data Science?","a":"Translating complex mathematical and machine learning predictions into clear, actionable business strategies for stakeholders."},{"q":"What distinguishes Data Engineering from Data Science?","a":"Data Engineering builds pipelines, infrastructure, and warehousing; Data Science builds predictive models and analytical algorithms."}]},{"id":2,"name":"Topic 2: Databases, SQL & NoSQL","cards":[{"q":"What does SQL stand for?","a":"Structured Query Language, officially pronounced 'Sequel'."},{"q":"When was SQL standardized?","a":"Standardized by ANSI in 1986 and ISO in 1987."},{"q":"Define an RDBMS.","a":"Relational Database Management System storing data in structured tables with rows, columns, and foreign key relations."},{"q":"What were early database limitations?","a":"Hierarchical and network databases were rigid and lacked flexible ad-hoc querying capabilities."},{"q":"List the 4 NoSQL database categories.","a":"1. Key/Value Stores, 2. Document Stores, 3. Graph Databases, 4. Wide Column Stores."},{"q":"What is a Graph Database optimized for?","a":"Representing complex network relationships and connections using nodes and arcs (e.g., fraud detection)."},{"q":"What is a Key/Value Store optimized for?","a":"Maximum write performance and simple dictionary lookups."},{"q":"What do Document Stores manage?","a":"Semi-structured JSON or XML documents with internal structural indexing."},{"q":"What is a Wide Column Store?","a":"A dynamic column-oriented database optimized for massive analytical read scalability (e.g., Cassandra)."},{"q":"What are the core benefits of Cloud infrastructure?","a":"Elastic scalability, reduced maintenance overhead, managed reliability, and agile deployment."},{"q":"What are cloud migration risks?","a":"Vendor lock-in, data security risks, network replication costs, and lack of data locality."},{"q":"What is an Autonomous Database?","a":"A cloud database utilizing machine learning to automate tuning, patching, and security without manual intervention."},{"q":"Define Foreign Key.","a":"A column or set of columns in a table referencing the primary key of another table to maintain relational integrity."},{"q":"Define Primary Key.","a":"A unique column constraint guaranteeing every row in a table is uniquely identifiable with non-null values."},{"q":"What is Database Normalization?","a":"The structured process of organizing database tables to minimize data redundancy and dependency anomalies."},{"q":"What is a Data Mart?","a":"A departmental subset of an enterprise data warehouse focused on a single business line (e.g., Finance or Sales)."},{"q":"What is a Data Lakehouse?","a":"An open architecture combining the low-cost storage of data lakes with ACID transactions of data warehouses."},{"q":"What does ACID stand for?","a":"Atomicity, Consistency, Isolation, Durability."},{"q":"What is a Database Index?","a":"A sorted data structure improving data retrieval speed at the expense of storage space and write performance."},{"q":"Contrast DELETE and TRUNCATE in SQL.","a":"DELETE removes rows conditionally and logs each row; TRUNCATE quickly drops all table rows without individual row logging."}]},{"id":3,"name":"Topic 3: Programming & Git","cards":[{"q":"What are the three major language families?","a":"Machine languages, Assembly languages, and High-Level languages."},{"q":"Define Machine Language.","a":"The native binary (1s and 0s) instruction set executed directly by the CPU."},{"q":"Contrast Compiled and Interpreted languages.","a":"Compiled languages (C, C++) undergo a build step into machine code; Interpreted languages (Python, JS) execute line-by-line at runtime."},{"q":"Why is Python favored in AI/ML?","a":"It emphasizes code readability, supports multi-paradigm programming, and features extensive libraries (PyTorch, TensorFlow)."},{"q":"What is R specialized for?","a":"Advanced academic statistical modeling, data analysis, and publication-quality graphics."},{"q":"What is an IDE?","a":"Integrated Development Environment providing comprehensive coding, debugging, and version control tools."},{"q":"What is Jupyter Notebook?","a":"An open-source web application for creating documents combining live code, mathematical equations, and markdown."},{"q":"What is Google Colab?","a":"A cloud-hosted Jupyter environment providing free GPU/TPU accelerator hardware for machine learning."},{"q":"Define Git.","a":"A distributed version control system tracking source code modifications and history across local repositories."},{"q":"What is a Git Commit?","a":"A permanent snapshot recording changes to files, storing a unique hash and parent reference."},{"q":"What is the Git Staging Area?","a":"An intermediate index holding zone where modified files are prepared before committing."},{"q":"What is the HEAD reference in Git?","a":"A pointer referencing the currently checked-out commit or branch."},{"q":"Contrast git pull and git push.","a":"Pull fetches and merges remote repository changes into local; push uploads local commits to a remote server."},{"q":"What is a Git Branch?","a":"An independent, isolated line of development allowing feature building without altering master code."},{"q":"What is UML?","a":"Unified Modeling Language: a standardized visual modeling language for software engineering."},{"q":"What does a UML Use Case Diagram show?","a":"System behavior, illustrating interactions between external actors and internal functional use cases."},{"q":"What does a UML Class Diagram depict?","a":"System static structure, mapping classes, attributes, operations, and object associations."},{"q":"How are Python variables declared?","a":"Dynamically upon assignment without explicit type declaration."},{"q":"Are Python variable names case-sensitive?","a":"Yes, 'Data' and 'data' represent distinct variables."},{"q":"Distinguish parameter vs argument in Python.","a":"A parameter is defined in the function signature; an argument is the actual value passed during invocation."}]},{"id":4,"name":"Topic 4: Governance & GDPR","cards":[{"q":"Define Data Governance.","a":"A structured system defining authority, accountability, and control over organizational data assets."},{"q":"What is the role of a Data Steward?","a":"An operational role responsible for executing data policies, ensuring quality, and managing metadata."},{"q":"What is Master Data Management (MDM)?","a":"A discipline ensuring uniformity, accuracy, and accountability of an enterprise's core shared business entities."},{"q":"What is the primary mandate of GDPR?","a":"To give control over personal data back to natural persons and unify data protection regulations across the EU."},{"q":"What are the maximum GDPR financial penalties?","a":"Up to €20 million or 4% of global annual turnover, whichever is higher."},{"q":"What is the GDPR data breach notification window?","a":"Without undue delay, and no later than 72 hours after becoming aware of the breach."},{"q":"What does GDPR Article 4(1) define?","a":"Personal data: any information relating to an identified or identifiable natural person."},{"q":"What does GDPR Article 9(1) govern?","a":"Special categories of data (health, biometrics, genetics, racial origin, political opinions)."},{"q":"Contrast Anonymization and Pseudonymization.","a":"Anonymization permanently strips PII (irreversible, exempt from GDPR); Pseudonymization replaces identifiers with keys (reversible, still under GDPR)."},{"q":"What is Differential Privacy?","a":"A framework adding controlled mathematical noise to query responses to protect individual privacy."},{"q":"What is Privacy by Design?","a":"An engineering approach embedding privacy and data minimization into system architecture from inception."},{"q":"What is a Data Protection Officer (DPO)?","a":"An mandated enterprise role advising on GDPR compliance and monitoring data protection strategies."},{"q":"What is a primary drawback of data anonymization?","a":"Significant loss of analytical utility, zero auditability, and vulnerability to re-identification attacks."},{"q":"Define Data Quality.","a":"A measure of data condition based on accuracy, completeness, consistency, validity, and uniqueness."},{"q":"What is Metadata?","a":"Data providing structural information about other data (e.g., schemas, creation timestamps, ownership)."},{"q":"What is the Right to be Forgotten (Article 17)?","a":"The right of data subjects to request permanent erasure of personal data when no longer necessary."},{"q":"What is Data Minimization?","a":"The principle that data collected must be adequate, relevant, and limited to what is strictly necessary."},{"q":"What is a DPIA?","a":"Data Protection Impact Assessment: a process identifying and mitigating privacy risks in high-processing projects."},{"q":"Does GDPR apply outside the EU?","a":"Yes, extraterritorially if processing personal data of EU residents or offering goods/services to them."},{"q":"What is the ultimate benefit of robust Data Governance?","a":"Protected corporate reputation, regulatory compliance, minimized legal risk, and higher data trust."}]},{"id":5,"name":"Topic 5: Ethics & Team Dynamics","cards":[{"q":"What is the foundational base of Lencioni's 5 Dysfunctions?","a":"Absence of Trust."},{"q":"What is Level 2 in Lencioni's model?","a":"Fear of Conflict (leading to artificial harmony)."},{"q":"What is Level 3 in Lencioni's model?","a":"Lack of Commitment (ambiguity around strategic direction)."},{"q":"What is Level 4 in Lencioni's model?","a":"Avoidance of Accountability (tolerating poor performance)."},{"q":"What is Level 5 (peak) in Lencioni's model?","a":"Inattention to Results (prioritizing ego and status over team goals)."},{"q":"What does professional integrity require?","a":"Honesty, consistency, transparency, and strict protection of client confidentiality."},{"q":"What is a Conflict of Interest?","a":"A situation where personal interests compromise professional impartiality and objective judgment."},{"q":"Define intentional professional misconduct.","a":"Fraud, criminal negligence, or knowingly communicating false realities to stakeholders."},{"q":"What is Conceptual Soundness in modeling?","a":"Validating that a model's methodology, theoretical foundation, and assumptions are robust and unbiased."},{"q":"Why is ongoing model monitoring essential?","a":"To detect data drift, concept drift, and performance degradation in production."},{"q":"What is Transparency in Data Science?","a":"Clear documentation of data sources, storage locations, and prediction methodology."},{"q":"What is the RACI matrix used for?","a":"Defining project roles: Responsible, Accountable, Consulted, and Informed."},{"q":"What is PRINCE2?","a":"A structured project management methodology focusing on organization, control, and stages."},{"q":"Why conduct peer code reviews?","a":"To catch bugs, enforce standards, and eliminate single-point-of-failure dependencies."},{"q":"What is an NDA?","a":"Non-Disclosure Agreement: a legal contract protecting confidential information from unauthorized disclosure."},{"q":"How should ambiguity in data quality be handled?","a":"Document anomalies transparently, consult domain experts, and remediate before modeling."},{"q":"What is Whistleblower Protection?","a":"Legal safeguards protecting employees reporting corporate fraud or ethical violations."},{"q":"What is ML Model Bias?","a":"Systematic error introduced by skewed training data leading to unfair or discriminatory predictions."},{"q":"What is Model Explainability (XAI)?","a":"Techniques allowing human experts to understand how an AI model generated a specific decision."},{"q":"What is the ultimate goal of a Data Professional?","a":"To deliver ethical, evidence-based insights that drive sustainable organizational value."}]}],"analystTopics":[{"id":1,"name":"Topic 1: Business Analytics & CRISP-DM","cards":[{"q":"List the 4 types of Business Analytics.","a":"Descriptive, Diagnostic, Predictive, and Prescriptive."},{"q":"What does Descriptive Analytics examine?","a":"What happened and what is happening right now (historical and current state)."},{"q":"What does Diagnostic Analytics investigate?","a":"Why did it happen? Root-cause analysis of past anomalies."},{"q":"What is Predictive Analytics?","a":"Forecasting what is likely to happen in the future using statistical modeling and machine learning."},{"q":"What does Prescriptive Analytics provide?","a":"Automated optimization rules and actionable recommendations."},{"q":"List the 6 phases of CRISP-DM.","a":"1. Business Understanding, 2. Data Understanding, 3. Data Preparation, 4. Modelling, 5. Evaluation, 6. Deployment."},{"q":"Is CRISP-DM strictly linear?","a":"No, it is highly iterative; practitioners loop back as new data insights emerge."},{"q":"What is the primary role of BI tools?","a":"To bridge the gap between raw data and non-technical executive decision-making."},{"q":"Define ETL.","a":"Extract, Transform, Load: copying and cleaning data from sources into a target warehouse."},{"q":"Where can ETL transformations occur?","a":"In the source, during extraction, before loading, or during data modeling."},{"q":"What is Query Folding in Power BI?","a":"The ability of Power Query to push transformation steps back to the source database engine."},{"q":"Define a Star Schema.","a":"A database schema consisting of central Fact tables linked to surrounding Dimension tables."},{"q":"What is Fact Table Granularity?","a":"The level of detail represented by each row in a fact table."},{"q":"What is the most common table cardinality?","a":"Many-to-one (*:1) or One-to-many."},{"q":"Why is One-to-One cardinality discouraged?","a":"Because 1:1 tables should generally be merged into a single table."},{"q":"What is Many-to-Many cardinality?","a":"A relationship where neither table has unique keys; discouraged due to ambiguity."},{"q":"What is a DAX Calculated Column?","a":"Evaluated row-by-row, materialized in memory, and consumes file storage space."},{"q":"What is a DAX Measure?","a":"Evaluated on-demand using current filter context, consuming CPU resources with no physical storage."},{"q":"What is Trellising (Small Multiples)?","a":"Splitting a visualization into multiple side-by-side charts partitioned by a dimension."},{"q":"What is the primary goal of data visualization?","a":"To communicate information clearly, explore patterns, explain findings, and persuade stakeholders."}]},{"id":2,"name":"Topic 2: Statistics & Distributions","cards":[{"q":"Define Nominal scale.","a":"Categorical data with distinct named groups and no quantitative ranking."},{"q":"Define Ordinal scale.","a":"Categorical data with a natural sequential order, but no quantifiable distance between values."},{"q":"Define Interval scale.","a":"Numerical data with ordered intervals and equal units, but NO true absolute zero."},{"q":"Define Ratio scale.","a":"Numerical data with ordered values, equal intervals, and a true absolute zero point."},{"q":"Define Skewness.","a":"A measure of the asymmetry of a probability distribution around its mean."},{"q":"In a Negative Skew, what is the mean vs median?","a":"The mean is pulled below the median (Median > Mean)."},{"q":"In a Positive Skew, what is the mean vs median?","a":"The mean is pulled above the median (Median < Mean)."},{"q":"Define Kurtosis.","a":"A measure of the 'tailedness' or peakedness of a distribution relative to a normal curve."},{"q":"What is a Mesokurtic distribution?","a":"A normal distribution with a standard bell curve kurtosis."},{"q":"What is a Leptokurtic distribution?","a":"A distribution with heavy fat tails and a sharp, high peak."},{"q":"What is a Platykurtic distribution?","a":"A distribution with a flat top and thin, light tails."},{"q":"What does Pearson Correlation measure?","a":"Linear correlation between two continuous variables ranging from -1 to +1."},{"q":"What does Spearman Correlation measure?","a":"Non-parametric monotonic correlation based on ranked values."},{"q":"What is STL Decomposition?","a":"Seasonal and Trend decomposition using Loess, separating data into Trend, Seasonal, and Remainder."},{"q":"What does a Boxplot display?","a":"Minimum, Q1, Median (Q2), Q3, and Maximum values."},{"q":"Define Interquartile Range (IQR).","a":"The difference between the upper and lower quartiles (Q3 - Q1)."},{"q":"Define Standard Deviation.","a":"A measure of dispersion or spread of data values around the mean."},{"q":"What is a PMF?","a":"Probability Mass Function: gives probabilities for discrete random variables."},{"q":"What is a PDF?","a":"Probability Density Function: specifies probabilities for continuous random variables."},{"q":"What defines a Normal Distribution?","a":"Two parameters: Mean (μ) and Standard Deviation (σ)."}]},{"id":3,"name":"Topic 3: Machine Learning & Metrics","cards":[{"q":"Define Supervised Learning.","a":"Training a model using labeled input/output pairs to predict future outcomes."},{"q":"Define Unsupervised Learning.","a":"Finding hidden patterns or structures in unlabeled data (e.g., clustering)."},{"q":"What is Classification?","a":"A supervised task predicting categorical class labels."},{"q":"What is Regression?","a":"A supervised task predicting continuous numerical values."},{"q":"What is K-Means Clustering?","a":"An unsupervised centroid-based clustering algorithm grouping data into K distinct clusters."},{"q":"What distance metrics can K-Means use?","a":"Euclidean, Manhattan, or Cosine distance."},{"q":"What is DBSCAN?","a":"A density-based clustering algorithm identifying arbitrary shapes and filtering noise."},{"q":"What is PCA?","a":"Principal Component Analysis: an unsupervised dimensionality reduction technique generating orthogonal components."},{"q":"What is a Confusion Matrix?","a":"A performance table detailing True/False Positives and True/False Negatives."},{"q":"Define Precision.","a":"TP / (TP + FP) — the accuracy of positive predictions."},{"q":"Define Recall (Sensitivity).","a":"TP / (TP + FN) — the proportion of actual positives correctly identified."},{"q":"What is the F1-Score?","a":"The harmonic mean of Precision and Recall."},{"q":"Define Mean Squared Error (MSE).","a":"A regression metric squaring errors to heavily penalize large outliers."},{"q":"What is a Decision Tree?","a":"A flowchart-like structure where internal nodes test features and leaves make decisions."},{"q":"Define Entropy in Decision Trees.","a":"A measure of impurity or uncertainty in a dataset."},{"q":"Define Information Gain.","a":"The expected reduction in entropy achieved by splitting data on a feature."},{"q":"What is Gini Impurity?","a":"A computationally efficient alternative to entropy measuring classification impurity."},{"q":"What is Ensemble Learning?","a":"Combining multiple models (e.g., Random Forest) to improve accuracy and stability."},{"q":"What is Overfitting?","a":"When an ML model memorizes training noise and fails to generalize to unseen test data."},{"q":"What is Cross-Validation?","a":"A resampling technique evaluating model performance across multiple train/test folds."}]},{"id":4,"name":"Topic 4: Artificial Intelligence (NLP & CV)","cards":[{"q":"Define Computer Vision.","a":"An AI subfield enabling computers to extract semantic understanding from images and video."},{"q":"Name CV applications.","a":"Facial recognition, augmented reality, autonomous vehicles, and medical imaging."},{"q":"Define NLP.","a":"Natural Language Processing: studying machine comprehension and generation of human language."},{"q":"Name NLP applications.","a":"Machine translation, sentiment analysis, text prediction, and chatbots."},{"q":"What is Sentiment Analysis?","a":"Classifying text emotional tone as positive, negative, or neutral."},{"q":"What is Speech Recognition?","a":"Converting spoken audio waveforms into written text."},{"q":"Define Reinforcement Learning.","a":"An ML paradigm where agents learn optimal actions via trial-and-error and delayed rewards."},{"q":"What is a Reinforcement Signal?","a":"Reward or penalty feedback given to an RL agent based on actions taken."},{"q":"Define Deep Learning.","a":"A subset of ML based on multi-layered neural networks capable of automatic feature extraction."},{"q":"What is an ANN?","a":"Artificial Neural Network: computing system with interconnected artificial neurons."},{"q":"What is Image Classification?","a":"Assigning an entire image a single descriptive category label."},{"q":"What is Object Detection?","a":"Locating specific objects within images using bounding boxes alongside classification."},{"q":"What is Tokenization in NLP?","a":"Splitting raw text strings into individual words or sub-word tokens."},{"q":"What is Lemmatization?","a":"Reducing words to their base dictionary lemma form."},{"q":"What is Stemming?","a":"A crude heuristic process chopping off word suffixes to reach root stems."},{"q":"What is a Chatbot?","a":"An NLP system simulating human conversation via text or voice."},{"q":"What is Autonomous Navigation?","a":"Real-time computer vision and sensor fusion enabling self-driving vehicles."},{"q":"What is Facial Biometrics?","a":"Extracting facial geometry for identity verification."},{"q":"What is OCR?","a":"Optical Character Recognition: converting scanned text images into machine-readable text."},{"q":"What is the future of Enterprise AI?","a":"Seamless integration of automated predictive modeling, generative AI, and real-time prescriptive decision-making."}]},{"id":5,"name":"Topic 5: Advanced Modeling & Metrics","cards":[{"q":"State the Linear Regression equation.","a":"y = a + b*x + e (a = intercept, b = coefficient, e = error)."},{"q":"What is Ridge Regression?","a":"Linear regression with L2 regularization preventing overfitting by penalizing large weights."},{"q":"What is Lasso Regression?","a":"Linear regression with L1 regularization capable of driving coefficients to zero for feature selection."},{"q":"What is the ROC-AUC Curve?","a":"Area Under the ROC curve measuring a classifier's discrimination capacity."},{"q":"What is a False Positive (Type I Error)?","a":"Rejecting a true null hypothesis (predicting positive when actual is negative)."},{"q":"What is a False Negative (Type II Error)?","a":"Failing to reject a false null hypothesis (predicting negative when actual is positive)."},{"q":"What is Hyperparameter Tuning?","a":"Optimizing external configuration settings (like learning rate or K) for an ML model."},{"q":"What is Gradient Descent?","a":"An iterative optimization algorithm finding cost function minima by moving downhill."},{"q":"What is Batch Normalization?","a":"Normalizing neural network layer activations to stabilize and accelerate training."},{"q":"What is Dropout?","a":"A regularization technique randomly dropping out network neurons during training to prevent co-adaptation."},{"q":"Define Time Series Forecasting.","a":"Predicting future values based on previously observed time-ordered data points."},{"q":"What is Autocorrelation?","a":"The correlation of a time series with a delayed copy of itself across successive lags."},{"q":"What is Stationarity?","a":"When a time series has constant mean, variance, and autocorrelation over time."},{"q":"What does ARIMA stand for?","a":"Autoregressive Integrated Moving Average."},{"q":"What is Anomaly Detection?","a":"Identifying rare observations that deviate significantly from majority data norms."},{"q":"What is Collaborative Filtering?","a":"Recommending items by analyzing preferences across multiple users."},{"q":"What is Content-Based Filtering?","a":"Recommending items similar to past user preferences based on item metadata."},{"q":"What is the Curse of Dimensionality?","a":"The exponential increase in data volume required as feature dimensions increase."},{"q":"Contrast Model Interpretability and Explainability.","a":"Interpretability is how easily model mechanics are understood; explainability is providing reasons for specific predictions."},{"q":"What is MLOps?","a":"The practice unifying ML development (Dev) and operations (Ops) for production environments."}]}]};
+const SUITE_EXAM_TERMS = new Set(["Anonymization", "Before loading", "Big Data", "Broken Ingestion", "CRISP-DM", "Classification", "Compiled languages", "Computer Vision", "Computer vision", "Correlation", "Cosine Distance", "DAX", "DBSCAN", "Data Governance", "Data Mining", "Data Science", "Data Swamps", "Data analytics", "Data-driven organizations are 23 times more likely to acquire customers", "Definition:", "Descriptive analytics", "Diagnostic analytics", "During data modelling", "During extraction", "ETL", "Euclidean distance", "GDPR", "GDPR IS ABOUT GIVING CONTROL OVER PERSONAL DATA BACK TO PEOPLE", "In the source", "Interpreters", "Interval", "K-Means", "Leptokurtic", "Manhattan distance", "Many-to-one (*:1)", "Mean Squared Error", "NLP", "Natural Language Processing (NLP)", "Negative skew", "NoSQL", "Nominal", "OLAP", "OLTP", "Ordinal", "PCA", "PII", "Precision", "Predictive analytics", "Prescriptive analytics", "Pseudonymization", "Python", "Query Folding", "R", "Ratio", "Recall", "Regression", "Reinforcement learning", "Remainder", "SQL", "STL", "Seasonal", "Sentiment Analysis", "Star Schema", "Supervised learning", "Trend", "Unsupervised learning", "Value", "Variety", "Velocity", "Veracity", "Volume", "hidden patterns or trends", "hierarchical databases", "materialized", "network databases", "orthogonal", "pink quotes", "relational databases", "structured data", "μ", "σ"]);
+let suiteOverlayMode='flashcards';
+let suiteFcTopic=0, suiteFcDeck=[], suiteFcIndex=0, suiteFcWrong=[];
+let suiteExamQuestions=[], suiteExamIndex=0, suiteExamScore=0, suiteExamWrong=[]; let suiteExamTimer=null; let suiteExamSeconds=0; let suiteExamLocked=false;
+
+function suiteCurrentTrack(){ return (typeof track!=='undefined' && track==='analyst') ? 'analyst' : 'foundation'; }
+function suiteTrackLabel(){ return suiteCurrentTrack()==='analyst' ? 'Analyst Track' : 'Foundation Track'; }
+function suiteOpen(mode){ document.getElementById('study-tools-overlay').classList.add('show'); suiteShow(mode||'flashcards'); }
+function suiteClose(){ document.getElementById('study-tools-overlay').classList.remove('show'); suiteStopTimer(); }
+function suiteBackdrop(e){ if(e.target===e.currentTarget) suiteClose(); }
+function suiteShow(mode){
+  suiteOverlayMode=mode;
+  ['flashcards','glossary','exam'].forEach(k=>{document.getElementById('suite-'+k).classList.toggle('hidden',k!==mode); document.getElementById('suite-nav-'+k).classList.toggle('active',k===mode);});
+  const titles={flashcards:'Flashcards',glossary:'Exam Glossary',exam:'Mock Exam'};
+  document.getElementById('suite-title').innerText=titles[mode];
+  document.getElementById('suite-track-label').innerText=suiteTrackLabel();
+  if(mode==='flashcards') suiteInitFlashcards();
+  if(mode==='glossary') suiteRenderGlossary();
+  if(mode==='exam') suiteRenderExamStart();
+}
+function suiteRefreshTrackViews(){ if(document.getElementById('study-tools-overlay').classList.contains('show')) suiteShow(suiteOverlayMode); }
+
+function suiteInitFlashcards(){
+ const d=SUITE_DATA[suiteCurrentTrack()+'Topics'];
+ document.getElementById('suite-fc-track').innerText=suiteTrackLabel();
+ const topicsEl=document.getElementById('suite-fc-topics'); topicsEl.innerHTML='';
+ d.forEach((t,i)=>{const b=document.createElement('button'); b.className='fc-topic '+(i===suiteFcTopic?'active':''); b.innerHTML='<i class="fa-solid fa-folder-open mr-1"></i> '+t.name; b.onclick=()=>{suiteFcTopic=i;suiteFcLoadTopic();suiteInitFlashcards();}; topicsEl.appendChild(b);});
+ if(!suiteFcDeck.length || suiteFcDeck._track!==suiteCurrentTrack() || suiteFcDeck._topic!==suiteFcTopic) suiteFcLoadTopic();
+ suiteFcRender();
+}
+function suiteFcLoadTopic(){
+ const t=SUITE_DATA[suiteCurrentTrack()+'Topics'][suiteFcTopic]||SUITE_DATA[suiteCurrentTrack()+'Topics'][0];
+ suiteFcDeck=t.cards.map((x,i)=>({...x,id:i})); suiteFcDeck._track=suiteCurrentTrack(); suiteFcDeck._topic=suiteFcTopic; suiteFcIndex=0; suiteFcWrong=[];
+ suiteFcRender();
+}
+function suiteFcRender(){
+ const card=suiteFcDeck[suiteFcIndex]; if(!card) return;
+ document.getElementById('suite-fc-question').innerText=card.q;
+ document.getElementById('suite-fc-answer').innerText=card.a;
+ document.getElementById('suite-fc-answer').classList.add('hidden'); document.getElementById('suite-fc-reveal').classList.remove('hidden');
+ document.getElementById('suite-fc-progress').innerText=(suiteFcIndex+1)+' / '+suiteFcDeck.length; document.getElementById('suite-fc-review').innerText='Review queue: '+suiteFcWrong.length;
+ document.getElementById('suite-fc-mastered').innerText=suiteFcDeck.filter(c=>c.mastered).length;
+}
+function suiteFcReveal(){document.getElementById('suite-fc-answer').classList.remove('hidden');document.getElementById('suite-fc-reveal').classList.add('hidden');}
+function suiteFcRate(mastered){
+ const card=suiteFcDeck[suiteFcIndex]; if(!card) return;
+ card.mastered=mastered;
+ if(!mastered) suiteFcWrong.push(card);
+ suiteFcIndex++;
+ if(suiteFcIndex>=suiteFcDeck.length){
+   if(suiteFcWrong.length){ suiteFcDeck=suiteFcWrong.map(x=>({...x,mastered:false})); suiteFcDeck._track=suiteCurrentTrack(); suiteFcDeck._topic=suiteFcTopic; suiteFcIndex=0; suiteFcWrong=[]; }
+   else { suiteFcIndex=0; }
+ }
+ suiteFcRender();
+}
+
+function suiteRenderGlossary(){
+ const src=SUITE_DATA[suiteCurrentTrack()+'Glossary']||[]; const q=(document.getElementById('suite-gloss-search')?.value||'').toLowerCase();
+ const el=document.getElementById('suite-glossary-list');
+ const rows=src.filter(x=>(x.term+' '+x.def).toLowerCase().includes(q));
+ el.innerHTML=rows.map(x=>{
+   const priority=[...SUITE_EXAM_TERMS].some(t=>x.term.toLowerCase().includes(t.toLowerCase())||t.toLowerCase().includes(x.term.toLowerCase()));
+   return '<div class="gloss-item"><div class="gloss-term">'+x.term+(priority?'<span class="gloss-priority">HIGH PRIORITY</span>':'')+'</div><p class="text-sm text-slate-300 leading-relaxed mt-2">'+x.def+'</p></div>';
+ }).join('') || '<div class="text-sm text-purple-300">No glossary entries match your search.</div>';
+}
+
+function suiteExamPool(){ return SUITE_DATA[suiteCurrentTrack()==='analyst'?'analyst':'foundation']; }
+function suiteRenderExamStart(){
+ document.getElementById('suite-exam-track').innerText=suiteTrackLabel();
+ document.getElementById('suite-exam-rules').innerText=suiteCurrentTrack()==='analyst'?'75 min • 70%':'60 min • 70%';
+}
+function suiteStartExam(retakeWrong){
+ suiteStopTimer(); suiteExamLocked=false; suiteExamIndex=0; suiteExamScore=0;
+ if(retakeWrong && suiteExamWrong.length) suiteExamQuestions=suiteExamWrong.map(q=>({...q})).slice();
+ else { const pool=[...suiteExamPool()]; pool.sort(()=>Math.random()-.5); suiteExamQuestions=pool.slice(0,40).map(q=>{
+   const opts=q.options.map((text,i)=>({text,isCorrect:i===q.answer})); opts.sort(()=>Math.random()-.5); return {...q,options:opts.map(x=>x.text),answer:opts.findIndex(x=>x.isCorrect)};
+ }); suiteExamWrong=[]; }
+ document.getElementById('suite-exam-start').classList.add('hidden'); document.getElementById('suite-exam-results').classList.add('hidden'); document.getElementById('suite-exam-run').classList.remove('hidden');
+ suiteExamSeconds=(suiteCurrentTrack()==='analyst'?75:60)*60; suiteRenderExamQuestion(); suiteExamTimer=setInterval(suiteTick,1000);
+}
+function suiteStopTimer(){if(suiteExamTimer){clearInterval(suiteExamTimer);suiteExamTimer=null;}}
+function suiteTick(){ suiteExamSeconds--; suiteUpdateTime(); if(suiteExamSeconds<=0){suiteStopTimer(); suiteShowExamResults(true);} }
+function suiteUpdateTime(){const m=Math.floor(Math.max(0,suiteExamSeconds)/60), s=Math.max(0,suiteExamSeconds)%60; const el=document.getElementById('suite-exam-time'); if(el) el.innerText=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');}
+function suiteRenderExamQuestion(){
+ const q=suiteExamQuestions[suiteExamIndex]; if(!q){suiteShowExamResults(false);return;}
+ suiteExamLocked=false; document.getElementById('suite-exam-qnum').innerText=(suiteExamIndex+1)+' / 40'; document.getElementById('suite-exam-progress').style.width=((suiteExamIndex+1)/40*100)+'%'; document.getElementById('suite-exam-topic').innerText=q.topic+' • '+(q.type==='scenario'?'Applied scenario':'Knowledge check'); document.getElementById('suite-exam-question').innerText=q.q;
+ const box=document.getElementById('suite-exam-options'); box.innerHTML=''; const fb=document.getElementById('suite-exam-feedback'); fb.classList.add('hidden'); document.getElementById('suite-exam-next').classList.add('hidden');
+ q.options.forEach((opt,i)=>{const b=document.createElement('button');b.className='mock-opt';b.innerText=opt;b.onclick=()=>suiteSelectExamOption(i,b);box.appendChild(b);}); suiteUpdateTime();
+}
+function suiteSelectExamOption(i,b){
+ if(suiteExamLocked) return; suiteExamLocked=true; const q=suiteExamQuestions[suiteExamIndex]; const btns=[...document.querySelectorAll('#suite-exam-options .mock-opt')];
+ if(i===q.answer){b.classList.add('correct'); suiteExamScore++;} else {b.classList.add('wrong'); suiteExamWrong.push(q);}
+ const fb=document.getElementById('suite-exam-feedback'); fb.className='mt-5 p-4 rounded-xl text-sm font-black '+(i===q.answer?'bg-emerald-950/60 text-emerald-200 border border-emerald-500/40':'bg-rose-950/60 text-rose-200 border border-rose-500/40'); fb.innerText=i===q.answer?'Correct.':'Incorrect. The answer is not revealed during the question; use your course notes when reviewing this topic.'; fb.classList.remove('hidden'); document.getElementById('suite-exam-next').classList.remove('hidden');
+}
+function suiteNextQuestion(){suiteExamIndex++; suiteExamIndex<40?suiteRenderExamQuestion():suiteShowExamResults(false);}
+function suiteShowExamResults(timeUp){
+ suiteStopTimer(); document.getElementById('suite-exam-run').classList.add('hidden'); document.getElementById('suite-exam-results').classList.remove('hidden'); document.getElementById('suite-result-score').innerText=suiteExamScore; const pct=suiteExamScore/40*100; document.getElementById('suite-result-icon').innerText=pct>=70?'🏆':'🎯'; const msg=document.getElementById('suite-result-message'); msg.className='mt-5 p-4 rounded-xl font-black border '+(pct>=70?'bg-emerald-950/50 text-emerald-200 border-emerald-500/40':'bg-rose-950/50 text-rose-200 border-rose-500/40'); msg.innerText=timeUp?('Time ended. Score: '+pct.toFixed(0)+'%. Review the relevant lessons and try again.'):(pct>=70?'Pass-level practice result. Keep reviewing the weak areas.':'Below the 70% target. Review the relevant lessons and try again.'); document.getElementById('suite-review-wrong').classList.toggle('hidden',suiteExamWrong.length===0); document.getElementById('suite-retake-wrong').classList.toggle('hidden',suiteExamWrong.length===0);
+}
+
+// Keep the added tools synchronized with the existing track without editing the original journey code.
+const _suiteOriginalTrackButtons=document.querySelectorAll('#track-foundation,#track-analyst');
+_suiteOriginalTrackButtons.forEach(btn=>btn.addEventListener('click',()=>setTimeout(suiteRefreshTrackViews,30)));
+// First render is ready whenever the user opens a tool.
+suiteRenderExamStart();
+</script>
+
+</body>
+</html>
