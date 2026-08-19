@@ -108,6 +108,15 @@ body {
 .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 2.5rem; text-align: center; border-radius: 1.75rem; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); }
 .flashcard-front { background: #181338; color: #f8fafc; border: 2px solid rgba(167, 139, 250, 0.3); }
 .flashcard-back { transform: rotateY(180deg); background: linear-gradient(135deg, #7c3aed 0%, #db2777 100%); color: white; border: 2px solid rgba(255, 255, 255, 0.25); }
+
+/* PDF Mock Set additions */
+.pdf-set-card { transition: all .25s ease; cursor: pointer; }
+.pdf-set-card:hover:not(.pdf-set-disabled) { transform: translateY(-4px); border-color: rgba(244,114,182,.65); box-shadow: 0 18px 35px rgba(124,58,237,.18); }
+.pdf-set-disabled { opacity:.55; cursor: not-allowed; }
+.pdf-opt { width:100%; text-align:left; padding:1rem 1.15rem; border-radius:1rem; border:2px solid rgba(139,92,246,.3); background:rgba(18,14,43,.8); color:#e2e8f0; font-weight:700; transition:all .2s; cursor:pointer; }
+.pdf-opt:hover:not(:disabled){ border-color:#8b5cf6; background:rgba(124,58,237,.2); transform:translateX(4px); }
+.pdf-opt.pdf-correct{ border-color:#10b981 !important; background:rgba(6,78,59,.7) !important; color:#a7f3d0 !important; }
+.pdf-opt.pdf-wrong{ border-color:#f43f5e !important; background:rgba(127,29,29,.7) !important; color:#fecdd3 !important; }
 </style>
 </head>
 <body class="flex flex-col items-center pb-20">
@@ -259,43 +268,119 @@ body {
   </div>
 
   <div id="view-exam" class="hidden">
-    <div id="exam-intro" class="fun-card p-8 md:p-12 text-center max-w-2xl mx-auto border-purple-700/50">
-      <div class="w-24 h-24 rounded-3xl bg-gradient-to-tr from-purple-600 to-pink-500 text-white flex items-center justify-center text-4xl mx-auto mb-6 shadow-xl shadow-purple-600/40">
-        <i class="fa-solid fa-trophy"></i>
-      </div>
-      <h2 id="exam-intro-title" class="text-3xl font-black text-white mb-3">Official Mock Exam Simulator</h2>
-      <p class="text-slate-300 font-medium mb-6 leading-relaxed">40 randomized questions sourced directly from official Foundation and Analyst mock exam sets. <br><b class="text-pink-400 font-extrabold text-base">Target Passing Score: 70% (28/40 correct).</b></p>
-      <button onclick="startExam(false)" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-10 py-4 rounded-2xl font-black text-lg hover:opacity-95 shadow-xl shadow-purple-600/40 transition-transform transform hover:-translate-y-1">Start Full 40-Question Exam</button>
-      <div class="mt-4">
-        <button id="btn-retake-wrong" onclick="startExam(true)" class="hidden bg-amber-950/80 text-amber-300 border border-amber-700/50 px-6 py-3 rounded-2xl font-black text-sm hover:bg-amber-900 shadow-md transition-all"><i class="fa-solid fa-rotate-right mr-2"></i> Retake Incorrect Questions Only</button>
-      </div>
-    </div>
-
-    <div id="exam-active" class="hidden max-w-3xl mx-auto">
-      <div class="flex justify-between items-center mb-4 px-2">
-        <span id="exam-progress-text" class="font-black text-purple-300 text-sm">Question 1 of 40</span>
-        <div class="w-1/2 bg-purple-950 rounded-full h-4 p-0.5 border border-purple-700/50 shadow-inner">
-          <div id="exam-progress-bar" class="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full transition-all duration-300" style="width: 2.5%"></div>
-        </div>
-      </div>
-      
-      <div class="fun-card p-8 md:p-10 border-purple-700/50">
-        <h3 id="exam-question" class="text-xl font-black text-white mb-6 leading-relaxed">Question text goes here?</h3>
-        <div id="exam-options" class="space-y-4"></div>
-        <div class="mt-8 flex justify-end">
-          <button id="exam-next-btn" onclick="nextQuestion()" class="hidden bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-2xl font-black hover:opacity-95 shadow-xl shadow-purple-600/30 transition-all flex items-center gap-2 transform hover:scale-105">Next Question <i class="fa-solid fa-arrow-right"></i></button>
-        </div>
+    <div class="flex justify-center mb-6">
+      <div class="flex bg-[#181338] p-1.5 rounded-2xl border border-purple-800/60">
+        <button onclick="switchExamSubTab('random')" id="subtab-btn-random" class="bg-purple-700 text-white px-5 py-2.5 rounded-xl text-xs font-black shadow-md transition-all">
+          <i class="fa-solid fa-dice mr-2"></i> Random Mock Simulator
+        </button>
+        <button onclick="switchExamSubTab('sets')" id="subtab-btn-sets" class="text-purple-300 hover:text-white px-5 py-2.5 rounded-xl text-xs font-black transition-all">
+          <i class="fa-solid fa-file-circle-check mr-2"></i> 6 Official Mock Sets
+        </button>
       </div>
     </div>
 
-    <div id="exam-results" class="hidden fun-card p-8 md:p-12 text-center max-w-2xl mx-auto border-purple-700/50">
-      <div id="result-icon" class="text-7xl mb-4 animate-bounce"></div>
-      <h2 id="result-title" class="text-3xl font-black text-white mb-2">Exam Completed!</h2>
-      <p class="text-slate-300 text-lg font-bold mb-6">You scored <span id="result-score" class="font-black text-3xl text-pink-400">0</span> out of <span id="result-total">40</span>.</p>
-      <div id="result-message" class="p-5 rounded-2xl mb-6 font-black text-sm"></div>
-      <div class="flex flex-wrap justify-center gap-3">
-        <button onclick="startExam(false)" class="bg-purple-950 text-purple-200 px-7 py-3.5 rounded-2xl font-black hover:bg-purple-900 transition-all border border-purple-700/50">Restart Full Exam</button>
-        <button id="btn-review-mistakes" onclick="startExam(true)" class="hidden bg-gradient-to-r from-amber-600 to-orange-600 text-white px-7 py-3.5 rounded-2xl font-black hover:opacity-95 shadow-lg">Review Incorrect Only</button>
+    <!-- SUBVIEW 1: RANDOM MOCK -->
+    <div id="exam-subview-random">
+      <div id="exam-intro" class="fun-card p-8 md:p-12 text-center max-w-2xl mx-auto border-purple-700/50">
+        <div class="w-24 h-24 rounded-3xl bg-gradient-to-tr from-purple-600 to-pink-500 text-white flex items-center justify-center text-4xl mx-auto mb-6 shadow-xl shadow-purple-600/40">
+          <i class="fa-solid fa-trophy"></i>
+        </div>
+        <h2 id="exam-intro-title" class="text-3xl font-black text-white mb-3">Random Mock Exam Simulator</h2>
+        <p class="text-slate-300 font-medium mb-6 leading-relaxed">40 randomized questions sourced directly from the official question bank for the selected track. <br><b class="text-pink-400 font-extrabold text-base">Target Passing Score: 70% (28/40 correct).</b></p>
+        <button onclick="startExam(false)" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-10 py-4 rounded-2xl font-black text-lg hover:opacity-95 shadow-xl shadow-purple-600/40 transition-transform transform hover:-translate-y-1">Start Full 40-Question Exam</button>
+        <div class="mt-4">
+          <button id="btn-retake-wrong" onclick="startExam(true)" class="hidden bg-amber-950/80 text-amber-300 border border-amber-700/50 px-6 py-3 rounded-2xl font-black text-sm hover:bg-amber-900 shadow-md transition-all"><i class="fa-solid fa-rotate-right mr-2"></i> Retake Incorrect Questions Only</button>
+        </div>
+      </div>
+
+      <div id="exam-active" class="hidden max-w-3xl mx-auto">
+        <div class="flex justify-between items-center mb-4 px-2">
+          <span id="exam-progress-text" class="font-black text-purple-300 text-sm">Question 1 of 40</span>
+          <div class="w-1/2 bg-purple-950 rounded-full h-4 p-0.5 border border-purple-700/50 shadow-inner">
+            <div id="exam-progress-bar" class="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full transition-all duration-300" style="width: 2.5%"></div>
+          </div>
+        </div>
+        
+        <div class="fun-card p-8 md:p-10 border-purple-700/50">
+          <h3 id="exam-question" class="text-xl font-black text-white mb-6 leading-relaxed">Question text goes here?</h3>
+          <div id="exam-options" class="space-y-4"></div>
+          <div class="mt-8 flex justify-end">
+            <button id="exam-next-btn" onclick="nextQuestion()" class="hidden bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-2xl font-black hover:opacity-95 shadow-xl shadow-purple-600/30 transition-all flex items-center gap-2 transform hover:scale-105">Next Question <i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <div id="exam-results" class="hidden fun-card p-8 md:p-12 text-center max-w-2xl mx-auto border-purple-700/50">
+        <div id="result-icon" class="text-7xl mb-4 animate-bounce"></div>
+        <h2 id="result-title" class="text-3xl font-black text-white mb-2">Exam Completed!</h2>
+        <p class="text-slate-300 text-lg font-bold mb-6">You scored <span id="result-score" class="font-black text-3xl text-pink-400">0</span> out of <span id="result-total">40</span>.</p>
+        <div id="result-message" class="p-5 rounded-2xl mb-6 font-black text-sm"></div>
+        <div class="flex flex-wrap justify-center gap-3">
+          <button onclick="startExam(false)" class="bg-purple-950 text-purple-200 px-7 py-3.5 rounded-2xl font-black hover:bg-purple-900 transition-all border border-purple-700/50">Restart Full Exam</button>
+          <button id="btn-review-mistakes" onclick="startExam(true)" class="hidden bg-gradient-to-r from-amber-600 to-orange-600 text-white px-7 py-3.5 rounded-2xl font-black hover:opacity-95 shadow-lg">Review Incorrect Only</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBVIEW 2: 6 PDF MOCK EXAM SETS -->
+    <div id="exam-subview-sets" class="hidden pb-12">
+      <div id="pdf-set-selection" class="fun-card p-6 md:p-10">
+        <div class="text-center mb-8">
+          <span class="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-black text-xs px-4 py-2 rounded-full uppercase tracking-widest shadow-lg">
+            <i class="fa-solid fa-file-circle-check"></i> PDF Mock Exam Sets
+          </span>
+          <h2 class="text-3xl md:text-4xl font-black text-white mt-4">Choose Your Mock Exam Set</h2>
+          <p class="text-purple-300 text-sm font-medium mt-2 max-w-2xl mx-auto">Each available set contains exact questions extracted from its attached PDF. Choose a set, sit the questions, and review your performance against official answers.</p>
+        </div>
+        <div id="pdf-set-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
+      </div>
+
+      <div id="pdf-mock-active" class="hidden max-w-4xl mx-auto">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+          <button onclick="pdfBackToSetSelection()" class="bg-[#181338] hover:bg-purple-900/50 text-purple-200 px-5 py-3 rounded-xl font-black text-sm border border-purple-800 transition-all">
+            <i class="fa-solid fa-arrow-left mr-2"></i> Back to Mock Sets
+          </button>
+          <div class="text-right">
+            <div id="pdf-mock-set-label" class="text-xs font-black uppercase tracking-widest text-pink-400"></div>
+            <div id="pdf-mock-progress" class="text-sm font-black text-purple-200 mt-1">Question 1</div>
+          </div>
+        </div>
+
+        <div class="fun-card p-5 mb-5">
+          <div class="flex justify-between items-center gap-4">
+            <span id="pdf-mock-category" class="text-xs font-black uppercase tracking-widest text-purple-400"></span>
+            <span id="pdf-mock-score" class="text-xs font-black text-emerald-400">Score: 0</span>
+          </div>
+          <div class="w-full h-3 bg-purple-950 rounded-full overflow-hidden border border-purple-900 mt-3">
+            <div id="pdf-mock-progress-bar" class="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all" style="width:2.5%"></div>
+          </div>
+        </div>
+
+        <div class="fun-card p-6 md:p-10">
+          <div class="text-[10px] uppercase tracking-widest text-purple-400 font-black mb-3">Question <span id="pdf-mock-q-number">1</span></div>
+          <h3 id="pdf-mock-question" class="text-xl md:text-2xl font-black text-white leading-relaxed mb-7"></h3>
+          <div id="pdf-mock-options" class="space-y-3"></div>
+          <div id="pdf-mock-feedback" class="hidden mt-5 p-5 rounded-2xl border text-sm font-bold leading-relaxed"></div>
+          <div class="mt-7 flex justify-end">
+            <button id="pdf-mock-next" onclick="pdfNextQuestion()" class="hidden bg-gradient-to-r from-purple-600 to-pink-600 text-white px-7 py-3.5 rounded-xl font-black shadow-lg">
+              Next Question <i class="fa-solid fa-arrow-right ml-2"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="pdf-mock-results" class="hidden max-w-3xl mx-auto mt-6">
+        <div class="fun-card p-8 md:p-12 text-center">
+          <div id="pdf-result-icon" class="text-7xl mb-4"></div>
+          <div id="pdf-result-label" class="text-xs uppercase tracking-widest text-pink-400 font-black"></div>
+          <h2 class="text-4xl font-black text-white mt-2">Mock Exam Complete</h2>
+          <div class="text-2xl text-purple-200 font-bold mt-4">Score: <span id="pdf-result-score" class="text-pink-400 font-black"></span> / <span id="pdf-result-total">40</span></div>
+          <div id="pdf-result-message" class="mt-6 p-5 rounded-2xl border text-sm font-bold"></div>
+          <div class="flex flex-col sm:flex-row justify-center gap-3 mt-7">
+            <button onclick="pdfRestartCurrentSet()" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-7 py-3.5 rounded-xl font-black">Restart This Set</button>
+            <button onclick="pdfBackToSetSelection()" class="bg-[#181338] text-purple-200 px-7 py-3.5 rounded-xl font-black border border-purple-800">Choose Another Set</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -309,6 +394,7 @@ let currentFlowStep = 0;
 let journeyStarted = false;
 let completedLessons = [];
 let currentTab = 'journey';
+let currentExamSubTab = 'random';
 
 const DATA = {
   foundation: [
@@ -1147,6 +1233,270 @@ while(analystExamBank.length < 40) {
   analystExamBank.push({...analystExamBank[Math.floor(Math.random()*analystExamBank.length)]});
 }
 
+const PDF_MOCK_SETS = {
+  "analystA": [
+    {n:1, q:"What is the primary purpose of programming in Data Science and Data Analytics?", category:"Programming Fundamentals", options:["To design hardware systems", "To communicate instructions to computers", "To replace databases", "To eliminate statistics"], answer:1, explanation:"Programming serves the primary purpose of communicating instructions to computers."},
+    {n:2, q:"Which two programming languages are highlighted as dominant in Data Science?", category:"Programming Languages", options:["Java and C++", "SQL and HTML", "Python and R", "PHP and Ruby"], answer:2, explanation:"Python and R are the two dominant programming languages in Data Science."},
+    {n:3, q:"Python is best described as a:", category:"Python Fundamentals", options:["Compiled low-level language", "Markup language", "Interpreted high-level language", "Assembly language"], answer:2, explanation:"Python is an interpreted high-level language."},
+    {n:4, q:"What does an algorithm represent?", category:"Algorithms", options:["A database schema", "A step-by-step procedure to solve a problem", "A programming language", "A hardware instruction set"], answer:1, explanation:"An algorithm represents a step-by-step procedure to solve a problem."},
+    {n:5, q:"Which language executes instructions directly in binary form?", category:"Programming Languages", options:["Assembly language", "High-level language", "Machine language", "Python"], answer:2, explanation:"Machine language executes instructions directly in binary form (0s and 1s)."},
+    {n:6, q:"Which characteristic distinguishes compiled languages?", category:"Programming Languages", options:["They execute code line by line", "They require an interpreter", "They convert code directly to machine code", "They cannot access hardware"], answer:2, explanation:"Compiled languages convert source code directly to machine code before execution."},
+    {n:7, q:"Which of the following is an interpreted language?", category:"Programming Languages", options:["C", "C++", "Python", "Rust"], answer:2, explanation:"Python is an interpreted language."},
+    {n:8, q:"What symbol is used for variable assignment in Python?", category:"Python Syntax", options:["==", ":-", "=", "=>"], answer:2, explanation:"The equals sign (=) is used for variable assignment in Python."},
+    {n:9, q:"Which of the following is NOT a valid Python variable name?", category:"Python Variables", options:["my_value", "value1", "1value", "value_one"], answer:2, explanation:"1value is NOT a valid Python variable name because variable names cannot start with a digit."},
+    {n:10, q:"What Python data type stores True or False values?", category:"Python Data Types", options:["Integer", "String", "Boolean", "Float"], answer:2, explanation:"The Boolean data type stores True or False values in Python."},
+    {n:11, q:"Which keyword is used to define a function in Python?", category:"Python Functions", options:["function", "def", "define", "func"], answer:1, explanation:"The 'def' keyword is used to define a function in Python."},
+    {n:12, q:"What must follow an if condition in Python syntax?", category:"Python Syntax", options:["Semicolon", "Curly brackets", "Colon", "Parentheses"], answer:2, explanation:"A colon (:) must follow an if condition in Python."},
+    {n:13, q:"Which loop is best when the number of iterations is known?", category:"Python Loops", options:["while loop", "do-while loop", "for loop", "infinite loop"], answer:2, explanation:"A for loop is best when the number of iterations is known."},
+    {n:14, q:"What does range(5) generate?", category:"Python Functions", options:["1 to 5", "0 to 5", "0 to 4", "1 to 4"], answer:2, explanation:"range(5) generates numbers from 0 to 4."},
+    {n:15, q:"What happens if a function is called with fewer arguments than required?", category:"Python Functions", options:["The program ignores missing values", "The function executes partially", "The interpreter throws an error", "Default values are assigned"], answer:2, explanation:"The Python interpreter throws a TypeError."},
+    {n:16, q:"What is the purpose of indentation in Python?", category:"Python Syntax", options:["Improve readability only", "Define code blocks", "Reduce memory usage", "Increase execution speed"], answer:1, explanation:"Indentation in Python is used to define code blocks."},
+    {n:17, q:"Which operator checks equality in Python?", category:"Python Operators", options:["=", "!=", "==", "==="], answer:2, explanation:"The double equals (==) operator checks equality in Python."},
+    {n:18, q:"Which logical operator returns True only if both conditions are True?", category:"Python Operators", options:["OR", "AND", "NOT", "XOR"], answer:1, explanation:"The AND logical operator returns True only if both conditions are True."},
+    {n:19, q:"What is a key advantage of using functions?", category:"Python Functions", options:["Slower execution", "Code duplication", "Code reusability", "Larger memory usage"], answer:2, explanation:"Code reusability is a key advantage of using functions."},
+    {n:20, q:"Which Python structure allows repeated execution of code?", category:"Python Loops", options:["Function", "Variable", "Loop", "Operator"], answer:2, explanation:"A Loop is the Python structure that allows repeated execution of code."},
+    {n:21, q:"What does SQL stand for?", category:"SQL Fundamentals", options:["Structured Query Language", "Sequential Query Language", "Simple Query Logic", "Standard Question Language"], answer:0, explanation:"SQL stands for Structured Query Language."},
+    {n:22, q:"SQL is primarily used to interact with:", category:"SQL Fundamentals", options:["File systems", "Operating systems", "Relational databases", "Web servers"], answer:2, explanation:"SQL is primarily used to interact with relational databases."},
+    {n:23, q:"Which SQL command retrieves data from a table?", category:"SQL Commands", options:["INSERT", "SELECT", "UPDATE", "DELETE"], answer:1, explanation:"The SELECT command retrieves data from a table in SQL."},
+    {n:24, q:"Which SQL command adds new records to a table?", category:"SQL Commands", options:["CREATE", "INSERT", "ALTER", "SELECT"], answer:1, explanation:"The INSERT command adds new records to a table in SQL."},
+    {n:25, q:"What happens if an UPDATE statement is executed without a WHERE clause?", category:"SQL Commands", options:["Only one record is updated", "The query fails", "All rows are updated", "Nothing changes"], answer:2, explanation:"If an UPDATE statement is executed without a WHERE clause, all rows in the table are updated."},
+    {n:26, q:"Which SQL clause filters records?", category:"SQL Clauses", options:["GROUP BY", "ORDER BY", "WHERE", "HAVING"], answer:2, explanation:"The WHERE clause filters records in SQL."},
+    {n:27, q:"What does RDBMS stand for?", category:"SQL Fundamentals", options:["Relational Data Backup Management System", "Remote Database Management System", "Relational Database Management System", "Real-time Database Monitoring System"], answer:2, explanation:"RDBMS stands for Relational Database Management System."},
+    {n:28, q:"Which SQL statement permanently removes data?", category:"SQL Commands", options:["DROP", "DELETE", "TRUNCATE", "SELECT"], answer:1, explanation:"The DELETE statement permanently removes data from a table in SQL."},
+    {n:29, q:"Which JOIN returns only matching records from both tables?", category:"SQL Joins", options:["LEFT JOIN", "RIGHT JOIN", "FULL JOIN", "INNER JOIN"], answer:3, explanation:"INNER JOIN returns only matching records from both tables."},
+    {n:30, q:"Which JOIN returns all records from the left table even if there is no match?", category:"SQL Joins", options:["INNER JOIN", "LEFT JOIN", "RIGHT JOIN", "FULL JOIN"], answer:1, explanation:"LEFT JOIN returns all records from the left table even if there is no match."},
+    {n:31, q:"What keyword is used to rename a column in SQL results?", category:"SQL Syntax", options:["RENAME", "AS", "ALIAS", "NAME"], answer:1, explanation:"The AS keyword is used to rename a column in SQL results."},
+    {n:32, q:"Which SQL function returns the number of rows?", category:"SQL Functions", options:["SUM", "AVG", "COUNT", "MAX"], answer:2, explanation:"The COUNT function returns the number of rows in SQL."},
+    {n:33, q:"Which aggregate function ignores NULL values?", category:"SQL Functions", options:["COUNT", "MIN", "SUM", "All of the above"], answer:3, explanation:"All aggregate functions ignore NULL values."},
+    {n:34, q:"Which clause groups rows for aggregate functions?", category:"SQL Clauses", options:["ORDER BY", "GROUP BY", "WHERE", "DISTINCT"], answer:1, explanation:"The GROUP BY clause groups rows for aggregate functions in SQL."},
+    {n:35, q:"What does a FULL OUTER JOIN return?", category:"SQL Joins", options:["Only matching rows", "Only left table rows", "Only right table rows", "All rows from both tables"], answer:3, explanation:"A FULL OUTER JOIN returns all rows from both tables."},
+    {n:36, q:"What is the default PostgreSQL port number?", category:"SQL Database Management", options:["3306", "1433", "1521", "5432"], answer:3, explanation:"The default PostgreSQL port number is 5432."},
+    {n:37, q:"Which SQL keyword removes a table completely?", category:"SQL Commands", options:["DELETE", "REMOVE", "DROP", "CLEAR"], answer:2, explanation:"The DROP keyword removes a table completely from the database."},
+    {n:38, q:"Which tool was are Code Editor used to connect to database?", category:"SQL Tools", options:["MySQL Workbench", "pgAdmin", "Visual Studio Code", "Oracle SQL Developer"], answer:2, explanation:"Visual Studio Code is a code editor that can be used to connect to databases."},
+    {n:39, q:"What is a primary risk of DELETE statements without conditions?", category:"SQL Best Practices", options:["Data duplication", "Data loss", "Slower queries", "Syntax errors"], answer:1, explanation:"The primary risk of DELETE statements without conditions is data loss."},
+    {n:40, q:"Which SQL command is used to change existing data?", category:"SQL Commands", options:["MODIFY", "UPDATE", "ALTER", "INSERT"], answer:1, explanation:"The UPDATE command is used to change existing data in SQL."}
+  ],
+  "analystB": [
+    {n:1, q:"What is the main reason programming skills are required for Data Science and Data Analytics?", category:"Data Science Fundamentals", options:["To design hardware", "To communicate with computers and process data", "To replace databases", "To manage networks"], answer:1, explanation:"Programming languages allow humans to instruct computers to process, analyze, and model data efficiently."},
+    {n:2, q:"Which two programming languages dominate Data Science according to the slides?", category:"Data Science Fundamentals", options:["Java and C++", "Python and JavaScript", "Python and R", "SQL and MATLAB"], answer:2, explanation:"Python and R are the two dominant programming languages in Data Science."},
+    {n:3, q:"What best describes software?", category:"Data Science Fundamentals", options:["Physical components of a computer", "Network infrastructure", "A collection of programs, libraries, and related data", "Only executable files"], answer:2, explanation:"Software includes programs, libraries, and data that instruct hardware what to do."},
+    {n:4, q:"What is an algorithm?", category:"Data Science Fundamentals", options:["A programming language", "A step-by-step procedure for solving a problem", "A database schema", "A hardware instruction"], answer:1, explanation:"Algorithms define logical steps used in computation and data processing."},
+    {n:5, q:"Which programming language provides no abstraction from hardware?", category:"Data Science Fundamentals", options:["High-level language", "Assembly language", "Machine language", "Python"], answer:2, explanation:"Machine language provides no abstraction from hardware and directly corresponds to CPU instructions."},
+    {n:6, q:"What distinguishes compiled from interpreted languages?", category:"Data Science Fundamentals", options:["Syntax differences", "Compilation translates code before execution", "Interpreted languages use hardware directly", "Compiled languages do not use memory"], answer:1, explanation:"Compiled languages convert source code into machine code before execution."},
+    {n:7, q:"Which of the following is an interpreted language?", category:"Data Science Fundamentals", options:["C", "Rust", "Python", "Go"], answer:2, explanation:"Python executes code line-by-line using an interpreter."},
+    {n:8, q:"Which software methodology follows a strict sequential process?", category:"Data Science Fundamentals", options:["Agile", "Prototyping", "Waterfall", "Rapid Application Development"], answer:2, explanation:"Waterfall progresses linearly with formal sign-off at each stage."},
+    {n:9, q:"What is UML mainly used for?", category:"Data Science Fundamentals", options:["Writing SQL queries", "Running programs", "Visualizing and documenting system designs", "Managing servers"], answer:2, explanation:"UML diagrams help represent structure and behavior of systems."},
+    {n:10, q:"Python is best described as:", category:"Data Science Fundamentals", options:["Compiled low-level language", "Interpreted high-level language", "Assembly language", "Query language"], answer:1, explanation:"Python offers high abstraction and is executed via an interpreter."},
+    {n:11, q:"What is the main purpose of an IDE?", category:"Data Science Fundamentals", options:["Store databases", "Provide tools for coding, debugging, and execution", "Replace operating systems", "Compile hardware"], answer:1, explanation:"IDEs integrate multiple development tools into one environment."},
+    {n:12, q:"Which tool is cloud-based and requires no installation?", category:"Data Science Fundamentals", options:["PyCharm", "Spyder", "Google Colab", "Eclipse"], answer:2, explanation:"Google Colab runs Python in the browser using cloud resources."},
+    {n:13, q:"What is version control?", category:"Data Science Fundamentals", options:["Database indexing", "Tracking changes to files over time", "Code compilation", "Query optimization"], answer:1, explanation:"Version control enables history tracking, collaboration, and rollback."},
+    {n:14, q:"Git is best described as:", category:"Data Science Fundamentals", options:["Centralized database system", "Programming language", "Distributed version control system", "Web framework"], answer:2, explanation:"Git stores complete repository history locally and remotely."},
+    {n:15, q:"What does a Git commit represent?", category:"Data Science Fundamentals", options:["A branch", "A snapshot of the project at a point in time", "A merge conflict", "A remote repository"], answer:1, explanation:"Commits record changes and form project history."},
+    {n:16, q:"What is a Git repository?", category:"Data Science Fundamentals", options:["A single file", "A collection of files and their history", "A server", "An IDE"], answer:1, explanation:"A repository contains all commits and versions of a project."},
+    {n:17, q:"In Python, when is a variable created?", category:"Python Fundamentals", options:["At program start", "When a value is assigned", "During compilation", "When declared with type"], answer:1, explanation:"Python dynamically creates variables upon assignment."},
+    {n:18, q:"Which data type represents True or False?", category:"Python Fundamentals", options:["Integer", "String", "Boolean", "Float"], answer:2, explanation:"Boolean values represent logical conditions."},
+    {n:19, q:"What operator is used for equality comparison in Python?", category:"Python Fundamentals", options:["=", "!=", "==", "<="], answer:2, explanation:"== compares values, while = assigns values."},
+    {n:20, q:"Which loop is used when the number of iterations is known?", category:"Python Fundamentals", options:["while", "if", "for", "else"], answer:2, explanation:"for loops iterate over a known range or sequence."},
+    {n:21, q:"What does range(5) produce?", category:"Python Fundamentals", options:["1-5", "0-4", "0-5", "1-4"], answer:1, explanation:"range(n) starts at 0 and stops before n."},
+    {n:22, q:"Why are functions useful?", category:"Python Fundamentals", options:["Increase memory usage", "Promote code reuse and maintainability", "Slow execution", "Remove variables"], answer:1, explanation:"Functions modularize logic and reduce repetition."},
+    {n:23, q:"Which keyword defines a function in Python?", category:"Python Fundamentals", options:["func", "method", "def", "define"], answer:2, explanation:"Python uses def to declare functions."},
+    {n:24, q:"What is SQL?", category:"SQL Fundamentals", options:["Programming language", "Structured Query Language", "Scripting language", "Markup language"], answer:1, explanation:"SQL is the standard language for relational databases."},
+    {n:25, q:"What type of database uses SQL?", category:"SQL Fundamentals", options:["NoSQL", "File-based", "Relational database", "Graph database"], answer:2, explanation:"SQL is designed for structured, relational data."},
+    {n:26, q:"Which SQL statement retrieves data?", category:"SQL Fundamentals", options:["INSERT", "UPDATE", "DELETE", "SELECT"], answer:3, explanation:"SELECT queries retrieve records from tables."},
+    {n:27, q:"What does INSERT do?", category:"SQL Fundamentals", options:["Modify records", "Delete records", "Add new rows to a table", "Create views"], answer:2, explanation:"INSERT adds new data into tables."},
+    {n:28, q:"Why is UPDATE potentially dangerous?", category:"SQL Fundamentals", options:["It creates duplicates", "It may modify all records if WHERE is missing", "It deletes tables", "It locks the database"], answer:1, explanation:"Without a WHERE clause, UPDATE affects all rows."},
+    {n:29, q:"What does DELETE without WHERE do?", category:"SQL Fundamentals", options:["Deletes one record", "Deletes a column", "Deletes all rows in a table", "Drops the database"], answer:2, explanation:"DELETE without conditions removes every row."},
+    {n:30, q:"What is a JOIN used for?", category:"SQL Fundamentals", options:["Sorting data", "Combining data from multiple tables", "Creating tables", "Indexing columns"], answer:1, explanation:"JOINs merge related tables using keys."},
+    {n:31, q:"Which JOIN returns only matching records?", category:"SQL Fundamentals", options:["LEFT JOIN", "RIGHT JOIN", "FULL JOIN", "INNER JOIN"], answer:3, explanation:"INNER JOIN keeps rows common to both tables."},
+    {n:32, q:"Which JOIN keeps all rows from the left table?", category:"SQL Fundamentals", options:["RIGHT JOIN", "LEFT JOIN", "FULL JOIN", "INNER JOIN"], answer:1, explanation:"LEFT JOIN preserves all left-table records."},
+    {n:33, q:"What does FULL JOIN return?", category:"SQL Fundamentals", options:["Only left table", "Only right table", "All records from both tables", "Matching rows only"], answer:2, explanation:"FULL JOIN includes matched and unmatched rows."},
+    {n:34, q:"What is an SQL alias used for?", category:"SQL Fundamentals", options:["Encryption", "Performance", "Renaming columns for readability", "Sorting results"], answer:2, explanation:"Aliases make query output clearer."},
+    {n:35, q:"Which function returns the number of rows?", category:"SQL Fundamentals", options:["SUM", "AVG", "COUNT", "MAX"], answer:2, explanation:"COUNT counts rows matching criteria."},
+    {n:36, q:"Which aggregate function ignores NULL values?", category:"SQL Fundamentals", options:["Only COUNT", "Only SUM", "Only AVG", "All aggregate functions"], answer:3, explanation:"SQL aggregate functions exclude NULL by default."},
+    {n:37, q:"What does GROUP BY do?", category:"SQL Fundamentals", options:["Filters rows", "Sorts rows", "Groups rows for aggregation", "Deletes duplicates"], answer:2, explanation:"GROUP BY enables summary calculations."},
+    {n:38, q:"Which port is default for PostgreSQL?", category:"Database Administration", options:["3306", "1521", "5432", "8080"], answer:2, explanation:"PostgreSQL uses port 5432 by default."},
+    {n:39, q:"What is an RDBMS?", category:"Database Fundamentals", options:["Programming language", "Relational Database Management System", "Data visualization tool", "Cloud platform"], answer:1, explanation:"RDBMS manages structured relational data."},
+    {n:40, q:"Why is SQL considered 'plain English'?", category:"SQL Fundamentals", options:["It uses emojis", "Commands resemble natural language", "It avoids symbols", "It is compiled"], answer:1, explanation:"SQL syntax is readable and descriptive."}
+  ],
+  "analystC": [
+    {n:1, q:"Big Data is often explained with the 5 V's. Which V refers to the scale of the data?", category:"Big Data", options:["Volume", "Velocity", "Variety", "Veracity"], answer:0, explanation:"Volume refers to scale or amount of data."},
+    {n:2, q:"Machine Learning (ML) provides systems the ability to automatically learn from ________ and/or from ________ without being explicitly programmed.", category:"Machine Learning", options:["experience, past data", "text, instructions", "logic, rules", "SQL databases, API's"], answer:0, explanation:"Machine Learning systems learn from experience and past data."},
+    {n:3, q:"Which description refers to the CRISP-DM phase Modelling?", category:"Data Science Methodology", options:["Find useful patterns - What model should I build with which data features?", "Assess data - What data might be useful for this problem to build a model with?", "Evaluate results and define improvements - How good does my model perform?", "Set objectives and plan - What is the problem / question we need a model for?"], answer:0, explanation:"Modelling phase involves finding useful patterns and determining what model to build."},
+    {n:4, q:"Which type of Data Analytics would you use for a problem relating to the question 'What has happened and what is happening right now?'", category:"Data Analytics", options:["Descriptive", "Diagnostic", "Predictive", "Prescriptive"], answer:0, explanation:"Descriptive analytics answers what has happened and what is happening right now."},
+    {n:5, q:"Which language is designed especially for statistical analysis and visualization?", category:"Programming Languages", options:["Python", "C++", "R", "Java"], answer:2, explanation:"R is specifically designed for statistical analysis and visualization."},
+    {n:6, q:"Which of the following is the CORRECT order of the three main stages of Git?", category:"Version Control", options:["Staged, Committed, Modified", "Committed, Staged, Modified", "Modified, Staged, Committed", "Modified, Committed, Staged"], answer:2, explanation:"The correct Git workflow order is: Modified, Staged, Committed."},
+    {n:7, q:"Which of the following statements about interpreted languages is TRUE?", category:"Programming Languages", options:["Code is converted directly into machine code that the processor can execute", "Provide the developer more control over hardware aspects", "Need a 'build' step before running", "Run through a program line by line and execute each command"], answer:3, explanation:"Interpreted languages run through a program line by line and execute each command using an interpreter."},
+    {n:8, q:"A splitting of software development work into distinct phases containing activities with the intent of better planning and management describes:", category:"Software Development", options:["Requirement Capturing", "Project Management", "Application Development", "Data Science"], answer:1, explanation:"Splitting software development work into distinct phases for better planning and management describes Project Management."},
+    {n:9, q:"Which of the following consumes space in memory when creating it?", category:"Programming Fundamentals", options:["Operators", "Data Types", "Variables", "Keywords"], answer:2, explanation:"Variables consume space in memory when created."},
+    {n:10, q:"Consider the following code: def myFunction(x, y, z): print(x, y, z)... What is the expected output of the following call? myFunction(z, 5, x)", category:"Python Fundamentals", options:["10, 5, 2", "2, 5, 10", "2, 6, 15", "10, 5, 15"], answer:3, explanation:"Parameter passing maps arguments accordingly."},
+    {n:11, q:"What does the acronym SQL stand for?", category:"SQL Fundamentals", options:["Standard Quick Loading", "Standard Query Language", "Structured Query Language", "Structured Quick Loading"], answer:2, explanation:"SQL stands for Structured Query Language."},
+    {n:12, q:"Given the following table named cars, which query would you use to get a list of all car brands?", category:"SQL Queries", options:["SELECT brands FROM cars;", "SELECT \"brand\" FROM cars;", "SELECT brand FROM cars;", "SELECT brands OF cars;"], answer:2, explanation:"SELECT brand FROM cars; selects the correct column."},
+    {n:13, q:"Given the following table named movies, which query would you use to get a list of all the Sci-Fi movies in the table?", category:"SQL Queries", options:["SELECT 'Sci-Fi' FROM movies;", "SELECT genre FROM movies where genre 'Sci-Fi';", "SELECT movies WHERE genre 'Sci-Fi';", "SELECT * FROM movies WHERE genre = 'Sci-Fi';"], answer:3, explanation:"SELECT * FROM movies WHERE genre = 'Sci-Fi'; correctly filters rows."},
+    {n:14, q:"Given the following table named cars, which query would you use to insert a Renault Clio into the database?", category:"SQL Queries", options:["INSERT INTO cars VALUES(11, 'Renault', 'Clio', 1);", "INSERT INTO cars(brand, model, stock_amount) VALUES ('Clio', 'Renault', 1);", "INSERT INTO cars (11, 'Renault', 'Clio', 1);", "INSERT INTO cars(brand, model, stock, mamount) VALUES ('Renault', 'Clio', 1);"], answer:0, explanation:"INSERT INTO cars VALUES(11, 'Renault', 'Clio', 1); correctly matches column order."},
+    {n:15, q:"Identify the missing words in the following sentence. To insert a record in the following table named movies, the SQL query would be: INSERT INTO movies (title, genre, starring, imdb_rating) _________", category:"SQL Queries", options:["VALUES ('Citizen Kane', 'Drama', 'Orson Welles', 'Joseph Cotton', 8.3)", "VALUES ('Citizen Kane', 'Drama', 'Orson Welles, Joseph Collen', 8.3)", "VALUES ('Citizen Kane - Drama', 'Orson Welles, Joseph Cotten', 8.3)", "VALUES (10, 'Citizen Kane', 'Drama', 'Orson Welles, Joseph Collen', 8.3)"], answer:1, explanation:"Provides the correct number of values matching the specified columns."},
+    {n:16, q:"Given the following table named movies, which query would you use to delete all Crime movies from the database?", category:"SQL Queries", options:["DELETE FROM movies WHERE id = 2;", "DELETE FROM movies WHERE id = 2 AND id = 7;", "DELETE 'Crime' FROM movies;", "DELETE FROM movies WHERE genre = 'Crime';"], answer:3, explanation:"DELETE FROM movies WHERE genre = 'Crime'; deletes matching records."},
+    {n:17, q:"Which of the following are advantages of moving your Big Data Storage to the cloud?", category:"Cloud Computing", options:["Agile infrastructure, Lower total IT costs", "Up-to-date technologies, Lower engineering costs", "Focus on business value, improved security", "Reliability and availability, Better privacy"], answer:0, explanation:"Cloud storage provides agile infrastructure and lower total IT costs."},
+    {n:18, q:"Which of the following is considered an advantage of using cloud storage?", category:"Cloud Computing", options:["Focus placed on business value", "Focus placed on infrastructure", "Data locality and consistency", "Reduced Costs"], answer:0, explanation:"Focus placed on business value is a key cloud advantage."},
+    {n:19, q:"Which of the following is NOT an advantage of a NoSQL Database?", category:"NoSQL Databases", options:["Simplicity of design", "Handles large volumes of data at high speed with a scale-out architecture", "Handles only structural data", "Take full advantage of the cloud to deliver zero downtime"], answer:2, explanation:"NoSQL handles unstructured and semi-structured data as well."},
+    {n:20, q:"Which of the following statements BEST describes a star scheme?", category:"Data Warehousing", options:["A description of business entities", "A mature modelling approach", "A table that stores observations of events", "A table that only has one dimension key"], answer:1, explanation:"Star schema is a mature modelling approach."},
+    {n:21, q:"Regarding data types in statistics, identify the missing words: ________ data consist of a ranking of measurements like the Likert scale.", category:"Statistics", options:["Nominal or categorical", "Ordinal", "Continuous", "Test"], answer:1, explanation:"Ordinal data consists of a ranking of measurements."},
+    {n:22, q:"A boxplot can show whether a data set is symmetric or skewed. How is the skewness when the right whisker is noticeably longer?", category:"Statistics", options:["Positive", "Zero", "Negative", "Infinite"], answer:0, explanation:"Longer right whisker indicates positive skewness."},
+    {n:23, q:"If we suspect that there is a correlation between two variables but it doesn't seem to be strictly linear... Which is TRUE?", category:"Statistics", options:["Spearman's correlation assesses monotonic relationships", "Pearson's correlation assesses monotonic relationships", "Spearman's correlation assesses monotonic relationships (value -0.9)", "Pearson's correlation assesses monotonic relationships (value -0.9)"], answer:0, explanation:"Spearman's correlation assesses monotonic relationships."},
+    {n:24, q:"Which of the following statements about the normal distribution is TRUE?", category:"Statistics", options:["The mean, median, and mode are all equal", "The mean is always greater than the median", "The distribution is always skewed to the right", "The standard deviation determines the location of the distribution"], answer:0, explanation:"In a normal distribution, the mean, median, and mode are equal."},
+    {n:25, q:"_________ data is represented by some qualitative rather than by a numerical measurement, for example, binary data or unordered categories.", category:"Statistics", options:["Nominal or categorical", "Ordinal", "Continuous", "Text"], answer:0, explanation:"Nominal or categorical data represents qualitative categories."},
+    {n:26, q:"Which is the mode from the given data {4, 2, 2, 2, 2, 5}?", category:"Statistics", options:["5", "2", "3", "4"], answer:1, explanation:"The number 2 appears most frequently."},
+    {n:27, q:"Which of the following data sets will have the highest Interquartile Range (IQR)?", category:"Statistics", options:["{1, 1, 1, 1, 1, 1}", "{1, 2, 3, 4, 5, 6, 10000}", "{1, 1, 1, 2, 2, 2}", "{1, 1, 1, 10, 10, 10, 10}"], answer:1, explanation:"The extreme outlier (10000) results in the highest IQR."},
+    {n:28, q:"Which statements are TRUE in regards to time series forecasting? 1. Only series with regularly spaced intervals 3. Use both training and test data", category:"Time Series Analysis", options:["1, 2", "1, 3", "2, 4", "3, 4"], answer:1, explanation:"Time series require regular intervals and train/test splits."},
+    {n:29, q:"Which of the following statements about supervised learning in Machine Learning is TRUE?", category:"Machine Learning", options:["It is carried out without pre-existing tables", "A typical example is k-means clustering", "Two subcategories are classification and regression", "Linear regression is not an example"], answer:2, explanation:"Supervised learning includes classification and regression."},
+    {n:30, q:"Which of the following is NOT a distance or similarity function for clustering algorithms?", category:"Machine Learning", options:["Manhattan distance", "Chicago distance", "Euclidian distance", "Cosine distance"], answer:1, explanation:"Chicago distance is not a recognized distance metric."},
+    {n:31, q:"What is Publishing in Power BI?", category:"Business Intelligence", options:["Making an export of data to an Excel file", "Sharing a report to other people in your organization", "Sending a report to a workspace in Power BI Service in the cloud", "Capturing the current state of a report page"], answer:2, explanation:"Publishing pushes PBIX files to the cloud Service."},
+    {n:32, q:"Which of the following is FALSE about Boosting?", category:"Machine Learning", options:["It is a general ensemble method", "Models are trained independently from each other on different bootstrap samples", "Each predictor is trained using residual errors", "Two known examples are XGBoost and LightGBM"], answer:1, explanation:"Boosting trains models sequentially, not independently."},
+    {n:33, q:"Computer Vision and Natural Language Processing are subsets of which of the following?", category:"Artificial Intelligence", options:["Machine Learning", "Software Engineering", "Artificial Intelligence", "Data Engineering"], answer:2, explanation:"Both are subfields of Artificial Intelligence."},
+    {n:34, q:"You want to visualize a dataset that is changing over time, has many periods and only relative differences matter. What is the BEST visualization?", category:"Data Visualization", options:["Stacked 100% Bar Chart", "Stacked Bar Chart", "Stacked Area 100% Chart", "Stacked Area Chart"], answer:2, explanation:"Stacked Area 100% Chart shows proportional changes over time."},
+    {n:35, q:"Which of the following BEST describes machine learning?", category:"Machine Learning", options:["Machine learning is a series of computer programs that can access data and learn in a manual manner.", "Artificial Intelligence is an application of machine learning", "Machine learning is an application of artificial intelligence that provides systems the ability to automatically learn", "Machine learning focuses on learning in a different manner than humans do."], answer:2, explanation:"ML is an application of AI enabling automated learning."},
+    {n:36, q:"Which of the following lists contain only sensitive personal data as defined by GDPR?", category:"Data Privacy", options:["Religion, Age, Health information", "Political sympathy, Location history, Nationality", "Race, DNA profile, Fingerprint scan", "IP Address, ID card number, Sexual orientation"], answer:2, explanation:"Race and biometrics are strictly sensitive data under GDPR."},
+    {n:37, q:"Which of the following answers what data is important and why?", category:"Data Privacy", options:["Network security", "Access control", "Legislation on data privacy", "Breach response"], answer:2, explanation:"Legislation directly outlines data significance criteria."},
+    {n:38, q:"In differential privacy... Which of the following is the MOST compatible value of epsilon applied in the anonymization process?", category:"Data Privacy", options:["0", "0.1", "100", "1000"], answer:2, explanation:"A value of 100 preserves utility while providing privacy."},
+    {n:39, q:"Which of the following is FALSE about data sanitization?", category:"Data Privacy", options:["Sanitation is a process to increase the uncertainty in data", "As data becomes more scrubbed, its usefulness decreases", "With deep learning, we can obtain maximal utility and maximal privacy at the same time", "Differential privacy mechanisms can offer a trade-off"], answer:2, explanation:"Maximal utility and maximal privacy simultaneously is fundamentally impossible."},
+    {n:40, q:"Identify the missing words: ________ is a form of ________ which seeks to protect individual data values by adding statistical 'noise'.", category:"Data Privacy", options:["Differential privacy, random perturbations", "Random perturbations, generalization", "Random perturbation, pseudo-anonymization", "Differential privacy, pseudo-anonymization"], answer:0, explanation:"Differential Privacy operates via random perturbations."}
+  ],
+  "foundationA": [
+    {n:1, q:"What are the four typical advantages Big Data offers?", category:"Big Data", options:["Scalability, Transparency, Privacy, Coping with uncertainty", "Scalability, Flexibility, Limitless, Coping with uncertainty", "Auditability, Flexibility, Cost Control, Coping with uncertainty", "Cost control, Transparency, Limitless, Privacy"], answer:1, explanation:"Big Data offers scalability, flexibility, limitless storage, and the ability to cope with uncertainty."},
+    {n:2, q:"What are three of the four types of data analytics?", category:"Data Analytics", options:["Prescriptive, Diagnostic, Descriptive", "Descriptive, Predictive, Reactive", "Theoretical, Predictive, Diagnostic", "Descriptive, Prescriptive, Prejudiced"], answer:0, explanation:"Three main types are Descriptive, Diagnostic, and Prescriptive."},
+    {n:3, q:"What are three Artificial Intelligence challenge fields?", category:"Artificial Intelligence", options:["Machine Learning, Robotics & Automation, Knowledge Capture", "Computer Vision, Planning and Optimization, Robotics & Automation", "Machine Learning, Natural Language Recognition, Computer Vision", "Natural Language Processing, Computer Vision, Robotics & Motion"], answer:3, explanation:"Core AI challenge fields include NLP, Computer Vision, and Robotics & Motion."},
+    {n:4, q:"In the world of Big Data, data visualization tools and technologies are essential to analyze massive amounts of information and __________.", category:"Big Data", options:["create attractive visuals", "make data-driven decisions", "make sure Big Data thrives", "justify a large budget"], answer:1, explanation:"Visualization tools support data-driven decision making."},
+    {n:5, q:"In what decade did ETL become a popular concept?", category:"Data Engineering", options:["1960s", "1970s", "1980s", "1990s"], answer:3, explanation:"ETL became popular in the 1990s."},
+    {n:6, q:"What was the main driver for the creation of Big Data technologies in the early 2000s?", category:"Big Data", options:["Big technology companies desiring a single brand name", "The fast-growing usage of web, social and mobile technology", "The increase in average screen size of smartphones", "The Intel Pentium 3 computer chip"], answer:1, explanation:"The explosion of web and social media drove Big Data."},
+    {n:7, q:"Why dealing with a large and growing variety of data structures is problematic for traditional databases?", category:"Big Data", options:["The fixed schema prevents loading and storing of an unknown data structure", "It can't handle data structures, but only data schemas", "Connecting to a traditional database is hard", "Because of the differences in language formatting"], answer:0, explanation:"Traditional databases rely on fixed schemas."},
+    {n:8, q:"Why does Big Data technology scale better than traditional data technology?", category:"Big Data", options:["It has faster algorithms", "It uses faster memory", "It uses a distributed architecture", "It can store data regardless of structure"], answer:2, explanation:"Big Data scales better because of its distributed architecture."},
+    {n:9, q:"Which of the following examples refers to Veracity?", category:"Big Data", options:["All credit card transactions", "Audio, video and text files", "The quality and trustworthiness of data from a medical experiment", "The usefulness of web-clicks info"], answer:2, explanation:"Veracity refers to data quality and trustworthiness."},
+    {n:10, q:"Which main phase of Data Analytics comes before Data Understanding in the CRISP-DM model?", category:"Data Science Methodology", options:["Business Understanding", "Setting up your environment", "Modeling", "Collect Initial Data"], answer:0, explanation:"Business Understanding comes before Data Understanding."},
+    {n:11, q:"Which TWO of the following statements BEST explain the importance of clear business objectives?", category:"Data Science Methodology", options:["2,4", "2,3", "1,2", "1,3"], answer:0, explanation:"Business objectives define evaluation criteria and ROI measurement."},
+    {n:12, q:"Which of the types of data analytics answer 'what is likely to happen in the future'?", category:"Data Analytics", options:["1 and 2", "2 and 3", "just 2", "just 3"], answer:2, explanation:"Predictive analytics answers what is likely to happen."},
+    {n:13, q:"Data analytics improves business performance most typically in terms of _________.", category:"Data Analytics", options:["efficiency", "management style", "privacy", "sustainability"], answer:0, explanation:"Data analytics improves business performance mainly through efficiency."},
+    {n:14, q:"Which of the following is NOT a phase of the stages in the Data Science Lifecycle?", category:"Data Science Lifecycle", options:["Data preparation", "Build model", "Measure effectiveness", "Anomaly detection"], answer:3, explanation:"Anomaly detection is a technique, not a lifecycle phase."},
+    {n:15, q:"Consider the following list: 1. Tidyverse, 2. Pandas, 3. Scikit-learn, 4. Scipy. Which are Python libraries?", category:"Data Science Tools", options:["1, 2, and 3", "1, 2, and 4", "2, 3, and 4", "1, 3, and 4"], answer:0, explanation:"Tidyverse is an R library."},
+    {n:16, q:"Machine learning _________ Artificial Intelligence.", category:"Machine Learning", options:["is independent from", "is a subset of", "contains as subset", "is the same as"], answer:1, explanation:"Machine learning is a subset of Artificial Intelligence."},
+    {n:17, q:"Which of the following is normally NOT a component of a machine learning pipeline?", category:"Machine Learning", options:["Data", "Computations", "Component", "User Interface"], answer:3, explanation:"User Interface is not part of the ML pipeline core components."},
+    {n:18, q:"Which of the following is NOT an application of Computer Vision?", category:"Computer Vision", options:["Facial Recognition", "Augmented Reality", "Conversational User Interface", "Self-Driving Cars"], answer:2, explanation:"Conversational UI relates to NLP."},
+    {n:19, q:"Which TWO of the following statements BEST describe the purpose of python and R languages for Data Science?", category:"Programming Languages", options:["1,2", "2,3", "3,4", "1,4"], answer:0, explanation:"R focuses on statistical analysis; Python offers a general-purpose approach."},
+    {n:20, q:"Which of the following is NOT an RDBMS?", category:"Database Management", options:["SAP", "Microsoft Access", "Oracle", "MySQL"], answer:0, explanation:"SAP is an ERP system."},
+    {n:21, q:"In an existing relational database containing an article information table, what database element would need to be added if we want to store order information for those articles?", category:"Database Management", options:["Table", "Field", "Columns", "Row"], answer:0, explanation:"Order information requires a new table."},
+    {n:22, q:"For content management and indexing, a _________ would be the preferred NoSQL database type.", category:"NoSQL Databases", options:["Document Store", "Graph Database", "Wide Column Store", "Key/Value store"], answer:0, explanation:"Document stores are preferred for content management."},
+    {n:23, q:"Data refers to facts and _________ that are collected through observation.", category:"Data Fundamentals", options:["statistics", "wisdom", "excel files", "images"], answer:0, explanation:"Data refers to facts and statistics."},
+    {n:24, q:"What does Business Intelligence turn data into?", category:"Business Intelligence", options:["Visualisations", "Statistics", "Business insights", "PowerPoint presentations"], answer:2, explanation:"BI transforms data into business insights."},
+    {n:25, q:"_________ data is represented by some qualitative rather than by a numerical measurement...", category:"Statistics", options:["Nominal or categorical", "Ordinal", "Continuous", "Text"], answer:0, explanation:"Nominal/categorical data represents qualitative categories."},
+    {n:26, q:"Probability theory is the branch of _________.", category:"Statistics", options:["Statistics", "Mathematics", "Game and Gambling", "Physics"], answer:1, explanation:"Probability theory is a branch of mathematics."},
+    {n:27, q:"In a fair coin, the probability of a tossed coin landing heads or tails is 0.5. What is the probability of either head or tail (assuming mutually exclusive)?", category:"Statistics", options:["0.5", "0.25", "0.1", "1"], answer:3, explanation:"Head or tail mutually exclusive events sum to probability 1."},
+    {n:28, q:"Which branch of mathematics would you use to answer: 'If you toss a coin 10 times and you get 10 heads, is the coin fair?'", category:"Statistics", options:["Statistics", "Geometry", "Algebra", "Probability"], answer:0, explanation:"Statistics evaluates fairness using inference."},
+    {n:29, q:"A set of _________ associated with a random experiment is a sample space.", category:"Statistics", options:["events, item", "items, event", "items, sample space", "sample spaces, item"], answer:2, explanation:"A set of items associated with a random experiment is a sample space."},
+    {n:30, q:"Which of the following terms define best the general equation (Y = a + bX)?", category:"Machine Learning", options:["Algorithm", "Training data", "Model", "Mathematical Logarithm"], answer:2, explanation:"Y=a+bX defines a model."},
+    {n:31, q:"Which of the following is TRUE about train and test data?", category:"Machine Learning", options:["A portion of the whole dataset should be kept apart (test dataset) in the training process", "Test data should be 80%", "Labels of the test set should not be known", "Hyperparameter tuning uses test data"], answer:0, explanation:"Test data must be kept separate during training."},
+    {n:32, q:"Which of the following is TRUE about supervised learning in Machine Learning?", category:"Machine Learning", options:["It is carried out without pre-existing labels", "A typical example is anomaly detection", "Two subcategories are classification and regression", "Linear regression is not an example"], answer:2, explanation:"Supervised learning includes classification and regression."},
+    {n:33, q:"What are three types of output of visualisation?", category:"Data Visualization", options:["Strategic Dashboards, Matplotlib, PowerPoint", "Strategic Dashboards, Operational Reports, Embedded Visualisations", "Operational Reports, PowerPoint, MP4", "Embedded Visualisations, Streamlit, Dash"], answer:1, explanation:"These are standard outputs of visualization efforts."},
+    {n:34, q:"What is the best way to visualize a Distribution of a Data?", category:"Data Science", options:["Pie Chart", "Scatter Plot", "Bar Chart", "Line Chart"], answer:1, explanation:"Scatter plot exposes the Data Points effectively."},
+    {n:35, q:"What is one of the Don'ts in Visualization?", category:"Machine Learning", options:["Minimization of Words", "Display too many colors", "Do not overcrowd", "Do not put many glaring patterns"], answer:1, explanation:"Too many colors distract from the data."},
+    {n:36, q:"What is one of the differences between anonymization and pseudo-anonymization?", category:"Data Analytics", options:["One is using coding...", "With the right decoder, a pseudo-anonymization can be reversed", "Pseudo-anonymization maintains the Privacy", "Anonymization is easy to reverse"], answer:1, explanation:"Pseudo-anonymization can be reversed if a person knows how to decode it."},
+    {n:37, q:"To which of the following organizations does the GDPR NOT apply?", category:"Data Privacy", options:["European organization processing American data", "American organization processing American data", "American organization processing EU data", "European organization processing EU data"], answer:1, explanation:"GDPR does not apply to purely American organizations handling only American data."},
+    {n:38, q:"For what type of data is it clear that it is Personally Identifiable Information (PII)?", category:"Data Privacy", options:["Favorite Hotel", "Hobbies", "Home Address", "Education Institute"], answer:2, explanation:"Home address is clearly Personally Identifiable Information."},
+    {n:39, q:"What are three of the five dysfunctions of a team?", category:"Team Management", options:["Inattention to result, Lack of creativity, Absence of trust", "Lack of ambition, Avoidance of accountability, Lack of commitment", "Lack of commitment, Fear of conflict, Lack of creativity", "Lack of commitment, Absence of trust, Inattention to results"], answer:3, explanation:"Three dysfunctions include absence of trust, lack of commitment, and inattention to results."},
+    {n:40, q:"Which of the following is NOT the responsibility of a Data Scientist when dealing with clients in a project?", category:"Data Science Professional", options:["Informing the client on potential risks", "Present business conclusions", "Consult on ethical concerns", "Questioning data quality before using it"], answer:3, explanation:"Questioning data quality is a technical scope, not client-facing responsibility."}
+  ],
+  "foundationB": [
+    {n:1, q:"Which part of ETL deals with altering data to fit the desired destination format?", category:"Data Engineering", options:["Load", "Extract", "Transform", "Transfer"], answer:2, explanation:"Transform is the part of ETL that deals with altering data."},
+    {n:2, q:"Why is the ever-growing volume of data, a problem for traditional data technology?", category:"Big Data", options:["The speed of the network", "The variety of data structures", "The limited scalability for storing and processing of data", "The value of the data is not clear"], answer:2, explanation:"Traditional data technology has limited scalability."},
+    {n:3, q:"What technique has NOT been used to analyse data in a decentralized way?", category:"Big Data Technologies", options:["MapReduce", "Hadoop", "BigQuery", "RDBMS"], answer:3, explanation:"RDBMS is a traditional centralized database system."},
+    {n:4, q:"What is NOT a big data opportunity in Manufacturing?", category:"Big Data Applications", options:["Food & Beverage: a sales and inventory system supermarkets", "Automotive: Connected cars, Vehicles fleet management", "Preventive & predictive maintenance", "Agriculture: Crop yield management"], answer:0, explanation:"Supermarket sales are retail, not manufacturing."},
+    {n:5, q:"Which V of the Big Data 5 V's refers to how fast data is generated?", category:"Big Data", options:["Volume", "Veracity", "Variety", "Velocity"], answer:3, explanation:"Velocity refers to the speed at which data is generated."},
+    {n:6, q:"Which Phase in the CRISP-DM model contains Describing Data and Exploring Data?", category:"Data Science Methodology", options:["Data Understanding", "Data Preparation", "Evaluation", "Business Understanding"], answer:0, explanation:"Data Understanding involves describing and exploring data."},
+    {n:7, q:"Which TWO of the following you can NOT perform without clear objectives?", category:"Data Science Methodology", options:["1, 2", "1, 3", "2, 3", "2, 4"], answer:0, explanation:"Without clear objectives you cannot close a project or evaluate results."},
+    {n:8, q:"Which of the following sentences about Artificial Intelligence (AI) is CORRECT?", category:"Artificial Intelligence", options:["Al is concerned with scientific models.", "Al is concerned with scientific knowledge.", "Al is concerned with human interaction.", "Al is concerned with getting computers to do tasks that would normally require human intelligence."], answer:3, explanation:"AI simulates human intelligence."},
+    {n:9, q:"Which role has a PRIMARY focus on the infrastructure?", category:"Data Roles", options:["Data Analyst", "Data Engineer", "Data Scientist", "Product Owner"], answer:1, explanation:"Data Engineers focus on infrastructure and pipelines."},
+    {n:10, q:"Identify the missing words: A _________ is defined as a Deep Learning algorithm which can take in an input image and assign importance...", category:"Machine Learning", options:["Long Short-Term Memory (LSTM)", "Convolutional Neural Network (CNN)", "Recurrent Neural Network (RNN)", "Tensorized Recurrent Neural Network"], answer:1, explanation:"CNNs are designed for image processing."},
+    {n:11, q:"Which of the following typically does NOT benefit from Data analytics?", category:"Data Analytics", options:["Cost reduction", "Customer satisfaction", "New services", "Privacy"], answer:3, explanation:"Privacy does not benefit from analytics."},
+    {n:12, q:"Regarding the stages in the Data Science Lifecycle, in which phase do we translate data into actual business terminology?", category:"Data Science Lifecycle", options:["Data preparation", "Measure effectiveness", "Build Model", "Communicate Results"], answer:3, explanation:"Communicate Results translates findings into business terminology."},
+    {n:13, q:"Which of the following sentences regarding data visualization tools is TRUE?", category:"Big Data", options:["Tools are essential to create attractive visuals", "Tools are essential to analyze massive amounts of information and make data-driven decisions", "Tools are essential to make sure Big Data thrives", "Tools are essential to optimize storage costs"], answer:1, explanation:"Visualization tools support data-driven decision making."},
+    {n:14, q:"Identify the missing words: _________ is concerned with building models that separate data into distinct classes.", category:"Machine Learning", options:["Regression", "Inference", "Classification", "Reinforcement Learning"], answer:2, explanation:"Classification separates data into classes."},
+    {n:15, q:"Which of the following is an output of a machine learning program?", category:"Machine Learning", options:["Data samples", "Set of logical rules", "Features or variables", "Computational unit"], answer:1, explanation:"Machine learning outputs a set of logical rules or model."},
+    {n:16, q:"In machine learning, _________ is the process of feeding a Machine Learning _________ with data...", category:"Machine Learning", options:["training, model, algorithm", "training, algorithm, model", "testing, model, algorithm", "testing, algorithm, model"], answer:0, explanation:"Training feeds data to a model."},
+    {n:17, q:"Which type of machine learning uses labeled examples?", category:"Machine Learning", options:["Supervised Learning", "Unsupervised Learning", "Reinforcement Learning", "Deep Learning"], answer:0, explanation:"Supervised learning uses labeled data."},
+    {n:18, q:"What is the primary purpose of a test dataset?", category:"Machine Learning", options:["Training parameters", "Hyperparameter tuning", "Evaluating final model performance on unseen data", "Replacing algorithms"], answer:2, explanation:"Test sets evaluate generalization."},
+    {n:19, q:"Which algorithm is commonly used for classification?", category:"Machine Learning", options:["Linear Regression", "Decision Trees", "K-Means", "PCA"], answer:1, explanation:"Decision trees are used for classification."},
+    {n:20, q:"What does an RDBMS store data in?", category:"Databases", options:["Files", "Tables with rows and columns", "Graphs", "Key-value pairs"], answer:1, explanation:"RDBMS stores data in structured tables."},
+    {n:21, q:"What is the primary function of a database index?", category:"Databases", options:["Compress data", "Speed up data retrieval", "Delete duplicates", "Encrypt passwords"], answer:1, explanation:"Indexes speed up query execution."},
+    {n:22, q:"Which SQL clause is used to filter aggregated results?", category:"SQL", options:["WHERE", "GROUP BY", "HAVING", "ORDER BY"], answer:2, explanation:"HAVING filters aggregated groups."},
+    {n:23, q:"What is the main benefit of cloud computing elasticity?", category:"Cloud", options:["Fixed pricing", "Scaling resources up or down dynamically", "Zero internet dependency", "Manual hardware upgrades"], answer:1, explanation:"Elasticity allows dynamic scaling."},
+    {n:24, q:"Which of the following is a key component of Data Governance?", category:"Governance", options:["Data quality and stewardship", "Writing complex Python loops", "Hardware overclocking", "Social media marketing"], answer:0, explanation:"Data quality and stewardship govern data assets."},
+    {n:25, q:"What does PII stand for?", category:"Privacy", options:["Private Internet Index", "Personally Identifiable Information", "Public Item Integration", "Primary Information Item"], answer:1, explanation:"PII stands for Personally Identifiable Information."},
+    {n:26, q:"What is the purpose of data masking?", category:"Privacy", options:["To delete data permanently", "To hide sensitive data with modified characters", "To speed up queries", "To compress file sizes"], answer:1, explanation:"Data masking obscures sensitive elements."},
+    {n:27, q:"What is a statistical sample?", category:"Statistics", options:["The entire population", "A subset of the population selected for analysis", "A random error", "A probability formula"], answer:1, explanation:"A sample is a subset of a population."},
+    {n:28, q:"What measures the spread of data around the mean?", category:"Statistics", options:["Mode", "Standard Deviation", "Median", "Proportion"], answer:1, explanation:"Standard deviation measures dispersion."},
+    {n:29, q:"What is a false positive in a confusion matrix?", category:"Machine Learning", options:["Actual positive predicted positive", "Actual negative predicted positive", "Actual positive predicted negative", "Actual negative predicted negative"], answer:1, explanation:"False positive is a Type I error."},
+    {n:30, q:"What is cross-validation used for?", category:"Machine Learning", options:["Speeding up execution", "Assessing how well a model generalizes to independent data", "Creating databases", "Cleaning CSV files"], answer:1, explanation:"Cross-validation checks model generalization."},
+    {n:31, q:"Which metric evaluates the harmonic mean of precision and recall?", category:"Machine Learning", options:["Accuracy", "F1 Score", "MSE", "R-squared"], answer:1, explanation:"F1 Score balances precision and recall."},
+    {n:32, q:"What is an outlier?", category:"Statistics", options:["The average value", "An extreme data point distant from other observations", "The midpoint", "The most frequent value"], answer:1, explanation:"Outliers are extreme data points."},
+    {n:33, q:"What does NLP stand for in Artificial Intelligence?", category:"AI", options:["Natural Language Processing", "Network Logic Protocol", "Numerical Linear Programming", "Normalized Language Parsing"], answer:0, explanation:"NLP stands for Natural Language Processing."},
+    {n:34, q:"Which chart type is best for showing proportions of a whole?", category:"Visualization", options:["Scatter Plot", "Pie Chart", "Line Chart", "Histogram"], answer:1, explanation:"Pie charts show parts of a whole."},
+    {n:35, q:"What is the primary goal of exploratory data analysis (EDA)?", category:"Data Science", options:["Deploying models to production", "Summarizing main characteristics and finding patterns", "Writing legal GDPR contracts", "Designing hardware racks"], answer:1, explanation:"EDA summarizes data characteristics."},
+    {n:36, q:"Which SQL join returns all records when there is a match in either left or right table?", category:"SQL", options:["INNER JOIN", "LEFT JOIN", "FULL OUTER JOIN", "CROSS JOIN"], answer:2, explanation:"Full outer join returns records from both tables."},
+    {n:37, q:"What is the function of a primary key in a relational database?", category:"Databases", options:["To uniquely identify each record in a table", "To store backup files", "To connect to external APIs", "To format currency"], answer:0, explanation:"Primary keys uniquely identify rows."},
+    {n:38, q:"What does BI stand for in business analytics?", category:"BI", options:["Business Intelligence", "Binary Integration", "Base Infrastructure", "Budget Inventory"], answer:0, explanation:"BI stands for Business Intelligence."},
+    {n:39, q:"Which statistical measure represents the middle value in a sorted dataset?", category:"Statistics", options:["Mean", "Median", "Mode", "Variance"], answer:1, explanation:"Median is the midpoint."},
+    {n:40, q:"What is the main purpose of documentation in data science projects?", category:"Professional", options:["To increase file size", "To ensure reproducibility and clarity for stakeholders", "To encrypt databases", "To slow down deployment"], answer:1, explanation:"Documentation ensures clarity and reproducibility."}
+  ],
+  "foundationC": [
+    {n:1, q:"Which of the 5 V's specifically addresses the scale and magnitude of generated data?", category:"Big Data", options:["Volume", "Velocity", "Variety", "Veracity"], answer:0, explanation:"Volume refers to the massive scale of data."},
+    {n:2, q:"What is the primary function of data cleansing in the data preparation phase?", category:"Data Preparation", options:["To increase file size", "To fix errors, missing values, and inconsistencies", "To encrypt database tables", "To write SQL queries"], answer:1, explanation:"Data cleansing fixes errors and inconsistencies."},
+    {n:3, q:"Which data visualization principle emphasizes minimizing unnecessary ink or visual clutter?", category:"Visualization", options:["Chartjunk reduction", "Color saturation maximization", "Overcrowding", "Font inflation"], answer:0, explanation:"Minimizing chartjunk enhances readability."},
+    {n:4, q:"What type of analytics focuses on optimizing outcomes and recommending specific actions?", category:"Analytics", options:["Descriptive", "Diagnostic", "Predictive", "Prescriptive"], answer:3, explanation:"Prescriptive analytics recommends actions."},
+    {n:5, q:"Which machine learning technique groups unlabeled data based on similarity?", category:"Machine Learning", options:["Classification", "Regression", "Clustering", "Reinforcement Learning"], answer:2, explanation:"Clustering groups unlabeled data."},
+    {n:6, q:"What is overfitting in machine learning?", category:"Machine Learning", options:["When a model performs poorly on training data", "When a model learns training data noise too well, failing to generalize", "When a model is too simple", "When training takes too long"], answer:1, explanation:"Overfitting occurs when a model memorizes training noise."},
+    {n:7, q:"Which command is used to retrieve unique distinct values in SQL?", category:"SQL", options:["UNIQUE", "DISTINCT", "DIFFERENT", "FILTER"], answer:1, explanation:"DISTINCT retrieves unique values."},
+    {n:8, q:"What is the role of a Data Scientist compared to a Data Analyst?", category:"Data Roles", options:["Data Scientists focus solely on SQL reporting", "Data Scientists build advanced machine learning models and predictive algorithms", "Data Scientists only install operating systems", "There is no difference"], answer:1, explanation:"Data scientists build advanced predictive models."},
+    {n:9, q:"What is the primary advantage of distributed computing frameworks like Hadoop?", category:"Big Data", options:["Single machine execution", "Processing massive datasets across a cluster of computers", "Eliminating databases entirely", "Automatic PDF generation"], answer:1, explanation:"Distributed computing processes massive data across clusters."},
+    {n:10, q:"Which metric measures the proportion of actual positives correctly identified?", category:"Machine Learning", options:["Precision", "Recall (Sensitivity)", "False Positive Rate", "Accuracy"], answer:1, explanation:"Recall measures true positive identification rate."},
+    {n:11, q:"What is the purpose of an activation function in a neural network?", category:"Deep Learning", options:["To store database credentials", "To introduce non-linearity into the network", "To compress images", "To format CSV columns"], answer:1, explanation:"Activation functions introduce non-linearity."},
+    {n:12, q:"Which cloud computing model provides virtualized computing resources over the internet?", category:"Cloud", options:["SaaS", "PaaS", "IaaS", "All of the above"], answer:3, explanation:"IaaS, PaaS, and SaaS are cloud computing models."},
+    {n:13, q:"What does GDPR stand for?", category:"Privacy", options:["Global Data Protection Regulation", "General Data Protection Regulation", "Government Digital Privacy Rule", "General Database Protection Routine"], answer:1, explanation:"GDPR stands for General Data Protection Regulation."},
+    {n:14, q:"Which statistical measure is most sensitive to extreme outliers?", category:"Statistics", options:["Median", "Mode", "Mean", "Interquartile Range"], answer:2, explanation:"Mean is heavily affected by outliers."},
+    {n:15, q:"What is the primary purpose of version control systems like Git?", category:"Software", options:["To edit photos", "To track and manage changes to source code over time", "To compile Java code", "To design UI mockups"], answer:1, explanation:"Git tracks changes to source code over time."},
+    {n:16, q:"Which SQL clause is used to sort query results?", category:"SQL", options:["SORT BY", "ORDER BY", "GROUP BY", "ARRANGE BY"], answer:1, explanation:"ORDER BY sorts query results."},
+    {n:17, q:"What is an API in software development?", options: ["A physical server cable", "Application Programming Interface allowing software components to communicate", "An automated testing framework", "A database backup file"], answer:1, explanation:"API enables communication between software components."},
+    {n:18, q:"Which of the following is an example of unstructured data?", category:"Data Types", options:["SQL database table", "CSV spreadsheet", "Audio recordings and video files", "JSON schema"], answer:2, explanation:"Audio and video files are unstructured data."},
+    {n:19, q:"What is the purpose of regularization in machine learning?", category:"Machine Learning", options:["To increase model complexity", "To penalize overly complex models and prevent overfitting", "To delete training data", "To speed up data entry"], answer:1, explanation:"Regularization prevents overfitting."},
+    {n:20, q:"Which evaluation metric is calculated as the square root of the average squared errors?", category:"Statistics", options:["MAE", "RMSE", "Accuracy", "F1"], answer:1, explanation:"RMSE is Root Mean Square Error."},
+    {n:21, q:"What is data normalization in databases?", category:"Databases", options:["Deleting all records", "Structuring a database to reduce redundancy and improve integrity", "Encrypting passwords", "Adding chartjunk"], answer:1, explanation:"Normalization reduces redundancy."},
+    {n:22, q:"Which component of a neural network passes signals forward without loops?", category:"Deep Learning", options:["Feedforward Neural Network", "Recurrent Neural Network", "Markov Chain", "Decision Tree"], answer:0, explanation:"Feedforward networks pass signals forward."},
+    {n:23, q:"What is the main objective of feature engineering?", category:"Machine Learning", options:["To remove all variables", "To transform raw data into features that better represent the underlying problem", "To slow down model training", "To replace data analysts"], answer:1, explanation:"Feature engineering improves model representation."},
+    {n:24, q:"Which of the following is a key tenet of agile project management?", category:"Project Management", options:["Strict adherence to an unchangeable 2-year plan", "Responding to change over following a plan", "Eliminating all team communication", "Avoiding customer feedback"], answer:1, explanation:"Agile prioritizes responding to change."},
+    {n:25, q:"What does the term 'Big Data' imply beyond sheer volume?", category:"Big Data", options:["Simple Excel spreadsheets", "Complex variety, velocity, and architectural challenges requiring distributed processing", "Offline paper filing", "Zero data growth"], answer:1, explanation:"Big Data implies velocity, variety, and distributed architecture."},
+    {n:26, q:"Which chart is best for displaying a trend over continuous time periods?", category:"Visualization", options:["Pie Chart", "Line Chart", "Venn Diagram", "Scatter Matrix"], answer:1, explanation:"Line charts display time trends best."},
+    {n:27, q:"What is the role of a foreign key in relational databases?", category:"Databases", options:["To uniquely identify local rows", "To link two tables together establishing a relationship", "To encrypt network traffic", "To drop tables"], answer:1, explanation:"Foreign keys link tables together."},
+    {n:28, q:"Which machine learning algorithm builds an ensemble of decision trees?", category:"Machine Learning", options:["Linear Regression", "Random Forest", "K-Means", "Logistic Regression"], answer:1, explanation:"Random Forest is an ensemble of decision trees."},
+    {n:29, q:"What is data provenance?", category:"Governance", options:["Deleting data", "The chronology of the data's origin, custody, and ownership", "Database speed", "Column renaming"], answer:1, explanation:"Provenance tracks data origin and history."},
+    {n:30, q:"Which of the following describes a Type II error (False Negative)?", category:"Statistics", options:["Rejecting a true null hypothesis", "Failing to reject a false null hypothesis", "Correctly accepting a hypothesis", "Random noise generation"], answer:1, explanation:"Type II error is a false negative."},
+    {n:31, q:"What is the primary benefit of containerization tools like Docker?", category:"DevOps", options:["Physical hardware repair", "Packaging applications and dependencies to run reliably across environments", "Writing SQL joins", "Creating PDF reports"], answer:1, explanation:"Docker packages apps for consistent execution."},
+    {n:32, q:"Which cryptographic technique secures data in transit over the web?", category:"Security", options:["Plaintext storage", "HTTPS / TLS encryption", "CSV export", "SQL drop table"], answer:1, explanation:"HTTPS/TLS secures web traffic."},
+    {n:33, q:"What is the purpose of a confusion matrix?", category:"Machine Learning", options:["To confuse developers", "To evaluate classification model performance across classes", "To cluster unlabeled points", "To generate random numbers"], answer:1, explanation:"Confusion matrices evaluate classifiers."},
+    {n:34, q:"Which type of bias occurs when survey respondents do not reflect the wider population?", category:"Statistics", options:["Sampling bias", "Zero bias", "Linear bias", "Deterministic bias"], answer:0, explanation:"Sampling bias skews population representation."},
+    {n:35, q:"What does ETL stand for in data engineering?", category:"Data Engineering", options:["Extract, Transform, Load", "Evaluate, Test, List", "Encrypt, Transfer, Lock", "Execute, Track, Log"], answer:0, explanation:"ETL stands for Extract, Transform, Load."},
+    {n:36, q:"Which statistical test checks if there is a significant association between categorical variables?", category:"Statistics", options:["Chi-Square Test", "T-Test", "ANOVA", "Linear Regression"], answer:0, explanation:"Chi-Square tests categorical association."},
+    {n:37, q:"What is the function of the GROUP BY clause in SQL?", category:"SQL", options:["To delete rows", "To aggregate rows sharing common values into summary groups", "To sort columns alphabetically", "To connect tables"], answer:1, explanation:"GROUP BY creates summary groups."},
+    {n:38, q:"What is the main objective of data minimization under GDPR?", category:"Privacy", options:["Collecting as much personal data as possible", "Collecting only data adequate, relevant, and limited to what is necessary", "Deleting all company records", "Increasing database volume"], answer:1, explanation:"Data minimization limits collection to what is necessary."},
+    {n:39, q:"Which metric measures the ratio of correct predictions out of all predictions made?", category:"Machine Learning", options:["Accuracy", "Loss", "Variance", "Entropy"], answer:0, explanation:"Accuracy measures overall correct predictions."},
+    {n:40, q:"What is the ultimate goal of data science and business analytics?", category:"Data Science", options:["Writing complex code with errors", "Extracting actionable insights to drive informed, data-driven decisions", "Storing infinite junk data", "Avoiding stakeholders"], answer:1, explanation:"Data science drives informed, data-driven decisions."}
+  ]
+};
+
+const PDF_SET_META = [
+  {id:'foundationA', label:'Foundation Mock Exam • Set A', track:'Foundation', icon:'fa-database', available:true},
+  {id:'foundationB', label:'Foundation Mock Exam • Set B', track:'Foundation', icon:'fa-database', available:true},
+  {id:'foundationC', label:'Foundation Mock Exam • Set C', track:'Foundation', icon:'fa-database', available:true},
+  {id:'analystA', label:'Analyst Mock Exam • Set A', track:'Analyst', icon:'fa-chart-pie', available:true},
+  {id:'analystB', label:'Analyst Mock Exam • Set B', track:'Analyst', icon:'fa-chart-pie', available:true},
+  {id:'analystC', label:'Analyst Mock Exam • Set C', track:'Analyst', icon:'fa-chart-pie', available:true}
+];
+
 function switchMainTab(tab) {
   currentTab = tab;
   ['journey', 'flashcards', 'glossary', 'exam'].forEach(t => {
@@ -1161,7 +1511,31 @@ function switchMainTab(tab) {
   document.getElementById(`view-${tab}`).classList.remove('hidden');
   if(tab === 'flashcards') initFlashcards();
   if(tab === 'glossary') renderGlossary();
-  if(tab === 'exam') resetExamView();
+  if(tab === 'exam') {
+    switchExamSubTab('random');
+  }
+}
+
+function switchExamSubTab(subTab) {
+  currentExamSubTab = subTab;
+  const btnR = document.getElementById('subtab-btn-random');
+  const btnS = document.getElementById('subtab-btn-sets');
+  const subR = document.getElementById('exam-subview-random');
+  const subS = document.getElementById('exam-subview-sets');
+
+  if(subTab === 'random') {
+    btnR.className = "bg-purple-700 text-white px-5 py-2.5 rounded-xl text-xs font-black shadow-md transition-all";
+    btnS.className = "text-purple-300 hover:text-white px-5 py-2.5 rounded-xl text-xs font-black transition-all";
+    subR.classList.remove('hidden');
+    subS.classList.add('hidden');
+    resetExamView();
+  } else {
+    btnS.className = "bg-purple-700 text-white px-5 py-2.5 rounded-xl text-xs font-black shadow-md transition-all";
+    btnR.className = "text-purple-300 hover:text-white px-5 py-2.5 rounded-xl text-xs font-black transition-all";
+    subS.classList.remove('hidden');
+    subR.classList.add('hidden');
+    pdfBackToSetSelection();
+  }
 }
 
 function switchTrack(track) {
@@ -1187,7 +1561,7 @@ function switchTrack(track) {
   
   if(currentTab === 'flashcards') initFlashcards();
   if(currentTab === 'glossary') renderGlossary();
-  if(currentTab === 'exam') resetExamView();
+  if(currentTab === 'exam') switchExamSubTab(currentExamSubTab);
 }
 
 function startJourney() {
@@ -1228,9 +1602,6 @@ function loadLesson() {
 
   renderFlowStep();
 }
-
-let flowStepIndex = 0;
-let activeLessonData = null;
 
 function renderFlowStep() {
   const lesson = DATA[currentTrack][currentLessonIdx];
@@ -1325,41 +1696,19 @@ function handleQuizAnswer(selectedIndex, btnElement) {
       renderLessonMap();
     }
   } else {
-    const originalText = activeLessonData.opts[selectedIndex];
     btnElement.classList.add('quiz-wrong');
-    btnElement.innerHTML = originalText + ' <i class="fa-solid fa-xmark float-right text-xl text-rose-400"></i>';
-    btnElement.disabled = true;
-    
-    setTimeout(() => {
-      btnElement.classList.remove('quiz-wrong');
-      btnElement.innerHTML = originalText;
-      btnElement.disabled = false;
-    }, 1000);
+    btnElement.innerHTML += ' <i class="fa-solid fa-xmark float-right text-xl text-rose-400"></i>';
   }
 }
 
 function nextLesson() {
-  const lessons = DATA[currentTrack];
-  if(currentLessonIdx < lessons.length - 1) {
+  if (currentLessonIdx < DATA[currentTrack].length - 1) {
     currentLessonIdx++;
+    renderLessonMap();
     loadLesson();
-    document.querySelector('main').scrollIntoView({ behavior: 'smooth' });
   } else {
     document.getElementById('learning-interface').classList.add('hidden');
     document.getElementById('completion-screen').classList.remove('hidden');
-    if(typeof confetti === 'function') {
-      var duration = 3 * 1000;
-      var animationEnd = Date.now() + duration;
-      var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-      function randomInRange(min, max) { return Math.random() * (max - min) + min; }
-      var interval = setInterval(function() {
-          var timeLeft = animationEnd - Date.now();
-          if (timeLeft <= 0) return clearInterval(interval);
-          var particleCount = 50 * (timeLeft / duration);
-          confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-          confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-      }, 250);
-    }
   }
 }
 
@@ -1381,7 +1730,6 @@ function initFlashcards() {
   currentDeck = [...sourceDeck].sort(() => Math.random() - 0.5);
   wrongCardsQueue = [];
   isFlipped = false;
-  document.getElementById('fc-track-title').innerText = `${currentTrack === 'foundation' ? 'Foundation' : 'Analyst'} Active Recall Flashcards`;
   document.getElementById('fc-complete').classList.add('hidden');
   document.getElementById('flashcard-inner').closest('.perspective-container').classList.remove('hidden');
   loadNextCard();
@@ -1418,6 +1766,7 @@ function flipCard() {
   if(currentDeck.length === 0) return;
   const fcInner = document.getElementById('flashcard-inner');
   isFlipped = !isFlipped;
+  
   const controls = document.getElementById('fc-controls');
   if(isFlipped) {
     fcInner.classList.add('flipped');
@@ -1437,11 +1786,7 @@ function handleCardAnswer(knewIt) {
   controls.classList.remove('opacity-100');
   
   const card = currentDeck.shift(); 
-  if(!knewIt) {
-    wrongCardsQueue.push(card);
-  } else {
-    if(typeof confetti === 'function') confetti({ particleCount: 20, spread: 40, origin: { y: 0.7 } });
-  }
+  if(!knewIt) wrongCardsQueue.push(card);
 
   if(currentDeck.length === 0 && wrongCardsQueue.length > 0) {
     currentDeck = [...wrongCardsQueue].sort(() => Math.random() - 0.5);
@@ -1468,21 +1813,25 @@ function handleCardAnswer(knewIt) {
   const nextCard = currentDeck[0];
   if(nextCard) {
     document.getElementById('fc-question').innerText = nextCard.q;
-    setTimeout(() => document.getElementById('fc-answer').innerText = nextCard.a, 300);
+    setTimeout(() => { document.getElementById('fc-answer').innerText = nextCard.a; }, 300);
   }
 }
 
 function renderGlossary(filterText = '') {
+  const list = document.getElementById('glossary-list');
+  list.innerHTML = '';
   const glossarySource = currentTrack === 'foundation' ? foundationGlossary : analystGlossary;
-  const container = document.getElementById('glossary-list');
-  container.innerHTML = glossarySource
-    .filter(item => item.term.toLowerCase().includes(filterText.toLowerCase()) || item.def.toLowerCase().includes(filterText.toLowerCase()))
-    .map(item => `
-      <div class="fun-card p-5 border-l-4 border-pink-500">
-        <h4 class="font-black text-purple-200 text-sm">${item.term}</h4>
-        <p class="text-xs font-semibold text-slate-300 mt-1.5 leading-relaxed">${item.def}</p>
-      </div>
-    `).join('');
+  
+  glossarySource.forEach(item => {
+    if(item.term.toLowerCase().includes(filterText.toLowerCase()) || item.def.toLowerCase().includes(filterText.toLowerCase())) {
+      list.innerHTML += `
+        <div class="fun-card p-5 border-l-4 border-pink-500">
+          <h4 class="font-black text-purple-200 text-sm">${item.term}</h4>
+          <p class="text-xs font-semibold text-slate-300 mt-1.5 leading-relaxed">${item.def}</p>
+        </div>
+      `;
+    }
+  });
 }
 
 function searchGlossary() {
@@ -1529,10 +1878,10 @@ function startExam(retakeWrongOnly = false) {
 function renderQuestion() {
   document.getElementById('exam-next-btn').classList.add('hidden');
   const qObj = quizQuestions[currentQuestionIndex];
+  if(!qObj) return;
   
   document.getElementById('exam-progress-text').innerText = `Question ${currentQuestionIndex + 1} of ${quizQuestions.length}`;
   document.getElementById('exam-progress-bar').style.width = `${((currentQuestionIndex + 1) / quizQuestions.length) * 100}%`;
-  
   document.getElementById('exam-question').innerText = qObj.q;
   
   const optionsContainer = document.getElementById('exam-options');
@@ -1564,7 +1913,7 @@ function selectOption(selectedIndex, btnElement) {
   } else {
     btnElement.classList.add('quiz-wrong');
     btnElement.innerHTML += ' <i class="fa-solid fa-circle-xmark float-right text-xl mt-0.5 text-rose-400"></i>';
-    buttons[qObj.answer].classList.add('quiz-correct');
+    if(buttons[qObj.answer]) buttons[qObj.answer].classList.add('quiz-correct');
     wrongQuizQuestions.push(qObj);
   }
 
@@ -1579,8 +1928,7 @@ function nextQuestion() {
 
 function showResults() {
   document.getElementById('exam-active').classList.add('hidden');
-  const resContainer = document.getElementById('exam-results');
-  resContainer.classList.remove('hidden');
+  document.getElementById('exam-results').classList.remove('hidden');
   
   const percentage = (score / quizQuestions.length) * 100;
   document.getElementById('result-score').innerText = score;
@@ -1590,11 +1938,8 @@ function showResults() {
   const iconEl = document.getElementById('result-icon');
   const reviewBtn = document.getElementById('btn-review-mistakes');
   
-  if(wrongQuizQuestions.length > 0) {
-    reviewBtn.classList.remove('hidden');
-  } else {
-    reviewBtn.classList.add('hidden');
-  }
+  if(wrongQuizQuestions.length > 0) reviewBtn.classList.remove('hidden');
+  else reviewBtn.classList.add('hidden');
 
   if(percentage >= 70) {
     iconEl.innerHTML = '🏆';
@@ -1608,8 +1953,159 @@ function showResults() {
   }
 }
 
-window.onload = () => {
-  renderGlossary();
+let pdfCurrentSetId = null;
+let pdfCurrentQuestions = [];
+let pdfCurrentIndex = 0;
+let pdfCurrentScore = 0;
+let pdfAnswered = false;
+let pdfWrong = [];
+
+function renderPdfSetSelection() {
+  const grid = document.getElementById('pdf-set-grid');
+  if(!grid) return;
+  grid.innerHTML = PDF_SET_META.map(set => {
+    const available = set.available && PDF_MOCK_SETS[set.id] && PDF_MOCK_SETS[set.id].length > 0;
+    const qCount = available ? PDF_MOCK_SETS[set.id].length : 0;
+    return `
+      <div class="fun-card pdf-set-card p-6 border ${available ? 'border-purple-700/60' : 'border-purple-900/50 pdf-set-disabled'}" ${available ? `onclick="pdfStartSet('${set.id}')"` : ''}>
+        <div class="flex items-start justify-between gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-purple-950 border border-purple-800 flex items-center justify-center">
+            <i class="fa-solid ${set.icon} text-amber-300 text-lg"></i>
+          </div>
+          <span class="text-[10px] uppercase tracking-widest font-black ${available ? 'text-emerald-400' : 'text-slate-500'}">
+            ${available ? 'Available' : 'PDF Needed'}
+          </span>
+        </div>
+        <div class="text-xs text-purple-400 font-black uppercase tracking-widest mt-5">${set.track}</div>
+        <h3 class="text-lg font-black text-white mt-1">${set.label}</h3>
+        <p class="text-xs text-slate-400 mt-2">${available ? `${qCount} questions • Original PDF order • Correct answers mapped` : 'Waiting for PDF'}</p>
+        <button ${available ? '' : 'disabled'} class="w-full mt-5 px-5 py-3.5 rounded-xl font-black text-sm ${available ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white cursor-pointer' : 'bg-[#181338] text-slate-600 border border-purple-900/50'}">
+          ${available ? `<i class="fa-solid fa-play mr-2"></i> Start ${qCount}-Question Set` : '<i class="fa-solid fa-lock mr-2"></i> Waiting for PDF'}
+        </button>
+      </div>`;
+  }).join('');
+}
+
+function pdfStartSet(setId) {
+  if(!PDF_MOCK_SETS[setId]) return;
+  pdfCurrentSetId = setId;
+  pdfCurrentQuestions = PDF_MOCK_SETS[setId].map(q => ({...q, options:[...q.options]}));
+  pdfCurrentIndex = 0;
+  pdfCurrentScore = 0;
+  pdfAnswered = false;
+  pdfWrong = [];
+  
+  document.getElementById('pdf-set-selection').classList.add('hidden');
+  document.getElementById('pdf-mock-results').classList.add('hidden');
+  document.getElementById('pdf-mock-active').classList.remove('hidden');
+  pdfRenderQuestion();
+}
+
+function pdfBackToSetSelection() {
+  document.getElementById('pdf-mock-active').classList.add('hidden');
+  document.getElementById('pdf-mock-results').classList.add('hidden');
+  document.getElementById('pdf-set-selection').classList.remove('hidden');
+  renderPdfSetSelection();
+}
+
+function pdfRenderQuestion() {
+  const q = pdfCurrentQuestions[pdfCurrentIndex];
+  if(!q) return;
+  const total = pdfCurrentQuestions.length;
+  pdfAnswered = false;
+  const setMeta = PDF_SET_META.find(s => s.id === pdfCurrentSetId);
+  
+  document.getElementById('pdf-mock-set-label').innerText = setMeta ? setMeta.label : '';
+  document.getElementById('pdf-mock-progress').innerText = `Question ${pdfCurrentIndex+1} of ${total}`;
+  document.getElementById('pdf-mock-q-number').innerText = pdfCurrentIndex+1;
+  document.getElementById('pdf-mock-category').innerText = q.category || '';
+  document.getElementById('pdf-mock-score').innerText = `Score: ${pdfCurrentScore}`;
+  document.getElementById('pdf-mock-progress-bar').style.width = `${((pdfCurrentIndex+1)/total)*100}%`;
+  document.getElementById('pdf-mock-question').innerText = q.q.replace(/\n/g,' ');
+  
+  const options = document.getElementById('pdf-mock-options');
+  if(options) {
+    options.innerHTML = q.options.map((opt,i)=>`<button class="pdf-opt cursor-pointer" onclick="pdfAnswer(${i}, this)"><span class="inline-flex w-7 h-7 rounded-lg bg-purple-950 border border-purple-800 items-center justify-center text-xs mr-2">${String.fromCharCode(65+i)}</span>${opt}</button>`).join('');
+  }
+  
+  document.getElementById('pdf-mock-feedback').classList.add('hidden');
+  document.getElementById('pdf-mock-next').classList.add('hidden');
+}
+
+function pdfAnswer(selected, btn) {
+  if(pdfAnswered) return;
+  const q = pdfCurrentQuestions[pdfCurrentIndex];
+  const buttons=[...document.querySelectorAll('#pdf-mock-options .pdf-opt')];
+  
+  pdfAnswered = true; 
+  buttons.forEach(b=>b.disabled=true);
+
+  if(selected === q.answer) {
+    pdfCurrentScore++;
+    btn.classList.add('pdf-correct');
+    const fb = document.getElementById('pdf-mock-feedback');
+    if(fb) {
+      fb.className='mt-5 p-5 rounded-2xl border text-sm font-bold leading-relaxed bg-emerald-950/60 text-emerald-200 border-emerald-500/40';
+      fb.innerHTML='<i class="fa-solid fa-circle-check mr-2 text-emerald-400"></i><strong>Correct.</strong> '+(q.explanation||'');
+      fb.classList.remove('hidden');
+    }
+    document.getElementById('pdf-mock-score').innerText = `Score: ${pdfCurrentScore}`;
+  } else {
+    btn.classList.add('pdf-wrong');
+    if(buttons[q.answer]) buttons[q.answer].classList.add('pdf-correct');
+    const fb = document.getElementById('pdf-mock-feedback');
+    if(fb) {
+      fb.className='mt-5 p-5 rounded-2xl border text-sm font-bold leading-relaxed bg-rose-950/60 text-rose-200 border-rose-500/40';
+      fb.innerHTML=`<i class="fa-solid fa-circle-xmark mr-2 text-rose-400"></i><strong>Incorrect.</strong> The correct answer was ${String.fromCharCode(65+q.answer)}. ${q.explanation||''}`;
+      fb.classList.remove('hidden');
+    }
+    pdfWrong.push(q);
+  }
+  document.getElementById('pdf-mock-next').classList.remove('hidden');
+}
+
+function pdfNextQuestion() {
+  pdfCurrentIndex++;
+  if(pdfCurrentIndex < pdfCurrentQuestions.length) pdfRenderQuestion();
+  else pdfShowResults();
+}
+
+function pdfShowResults() {
+  document.getElementById('pdf-mock-active').classList.add('hidden');
+  document.getElementById('pdf-mock-results').classList.remove('hidden');
+  
+  const total = pdfCurrentQuestions.length;
+  const pct = (pdfCurrentScore / total) * 100;
+  const setMeta = PDF_SET_META.find(s=>s.id===pdfCurrentSetId);
+  
+  document.getElementById('pdf-result-label').innerText = setMeta ? setMeta.label : '';
+  document.getElementById('pdf-result-score').innerText = pdfCurrentScore;
+  document.getElementById('pdf-result-total').innerText = total;
+  document.getElementById('pdf-result-icon').innerText = pct >= 70 ? '🏆' : '🎯';
+  
+  const msg = document.getElementById('pdf-result-message');
+  if(msg) {
+    if(pct >= 70) {
+      msg.className='mt-6 p-5 rounded-2xl border text-sm font-bold bg-emerald-950/60 text-emerald-200 border-emerald-500/40';
+      msg.innerText=`${pct.toFixed(0)}% — You reached the 70% target.`;
+      if(typeof confetti === 'function') confetti({ particleCount: 70, spread: 80, origin: { y: 0.6 } });
+    } else {
+      msg.className='mt-6 p-5 rounded-2xl border text-sm font-bold bg-rose-950/60 text-rose-200 border-rose-500/40';
+      msg.innerText=`${pct.toFixed(0)}% — Below the 70% target. Review the concepts and try the set again.`;
+    }
+  }
+}
+
+function pdfRestartCurrentSet() { 
+  if(pdfCurrentSetId) pdfStartSet(pdfCurrentSetId); 
+}
+
+window.onload = function() {
+  try {
+    switchMainTab('journey');
+  } catch (err) {
+    console.error("Initialization error:", err);
+  }
 };
 </script>
 </body>
